@@ -1,4 +1,4 @@
-#include "test_config.h"
+#include "ligarium_config.h"
 //
 #include "field.h"
 #include "record.h"
@@ -9,7 +9,7 @@
 class Property : public Ligarium::Record<Property>
 {
 public:
-  static constexpr Ligarium::Table static_table = ApplicationTable::Property;
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
 
   [[nodiscard]]
   QString dump() const override
@@ -61,98 +61,98 @@ void TestRecordRegistry::initially_empty()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  QVERIFY(!registry.contains(ApplicationTable::Property));
-  QCOMPARE(registry.dump(ApplicationTable::Property, 1), QString{});
+  QVERIFY(!registry.contains(Ligarium::Table::Property));
+  QCOMPARE(registry.dump(Ligarium::Table::Property, 1), QString{});
 }
 
 void TestRecordRegistry::register_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  registry.register_record(ApplicationTable::Property,
+  registry.register_record(Ligarium::Table::Property,
                            [](qsizetype id) { return QStringLiteral("Property %1").arg(id); });
 
-  QVERIFY(registry.contains(ApplicationTable::Property));
+  QVERIFY(registry.contains(Ligarium::Table::Property));
 }
 
 void TestRecordRegistry::dump_registered_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  registry.register_record(ApplicationTable::Property,
+  registry.register_record(Ligarium::Table::Property,
                            [](qsizetype id) { return QStringLiteral("Property %1").arg(id); });
 
-  QCOMPARE(registry.dump(ApplicationTable::Property, 42), QStringLiteral("Property 42"));
+  QCOMPARE(registry.dump(Ligarium::Table::Property, 42), QStringLiteral("Property 42"));
 }
 
 void TestRecordRegistry::dump_unknown_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  registry.register_record(ApplicationTable::Property,
+  registry.register_record(Ligarium::Table::Property,
                            [](qsizetype id) { return QStringLiteral("Property %1").arg(id); });
 
-  QCOMPARE(registry.dump(ApplicationTable::Tenant, 42), QString{});
+  QCOMPARE(registry.dump(Ligarium::Table::Tenant, 42), QString{});
 }
 
 void TestRecordRegistry::contains_registered_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  registry.register_record(ApplicationTable::Property, [](qsizetype) { return QStringLiteral("Property"); });
+  registry.register_record(Ligarium::Table::Property, [](qsizetype) { return QStringLiteral("Property"); });
 
-  QVERIFY(registry.contains(ApplicationTable::Property));
-  QVERIFY(!registry.contains(ApplicationTable::Tenant));
+  QVERIFY(registry.contains(Ligarium::Table::Property));
+  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
 }
 
 void TestRecordRegistry::contains_unknown_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  QVERIFY(!registry.contains(ApplicationTable::Property));
-  QVERIFY(!registry.contains(ApplicationTable::Tenant));
+  QVERIFY(!registry.contains(Ligarium::Table::Property));
+  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
 }
 
 void TestRecordRegistry::replace_registered_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  registry.register_record(ApplicationTable::Property, [](qsizetype) { return QStringLiteral("first"); });
+  registry.register_record(Ligarium::Table::Property, [](qsizetype) { return QStringLiteral("first"); });
 
-  registry.register_record(ApplicationTable::Property, [](qsizetype) { return QStringLiteral("second"); });
+  registry.register_record(Ligarium::Table::Property, [](qsizetype) { return QStringLiteral("second"); });
 
-  QCOMPARE(registry.dump(ApplicationTable::Property, 1), QStringLiteral("second"));
+  QCOMPARE(registry.dump(Ligarium::Table::Property, 1), QStringLiteral("second"));
 }
 
 void TestRecordRegistry::clear_registry()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  registry.register_record(ApplicationTable::Property, [](qsizetype) { return QStringLiteral("Property"); });
+  registry.register_record(Ligarium::Table::Property, [](qsizetype) { return QStringLiteral("Property"); });
 
-  registry.register_record(ApplicationTable::Tenant, [](qsizetype) { return QStringLiteral("Tenant"); });
+  registry.register_record(Ligarium::Table::Tenant, [](qsizetype) { return QStringLiteral("Tenant"); });
 
-  QVERIFY(registry.contains(ApplicationTable::Property));
-  QVERIFY(registry.contains(ApplicationTable::Tenant));
+  QVERIFY(registry.contains(Ligarium::Table::Property));
+  QVERIFY(registry.contains(Ligarium::Table::Tenant));
 
   registry.clear();
 
-  QVERIFY(!registry.contains(ApplicationTable::Property));
-  QVERIFY(!registry.contains(ApplicationTable::Tenant));
+  QVERIFY(!registry.contains(Ligarium::Table::Property));
+  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
 
-  QCOMPARE(registry.dump(ApplicationTable::Property, 1), QString{});
-  QCOMPARE(registry.dump(ApplicationTable::Tenant, 1), QString{});
+  QCOMPARE(registry.dump(Ligarium::Table::Property, 1), QString{});
+  QCOMPARE(registry.dump(Ligarium::Table::Tenant, 1), QString{});
 }
 
 void TestRecordRegistry::register_typed_record()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  Ligarium::register_record<Property>(registry, ApplicationTable::Property);
+  Ligarium::register_record<Property>(registry, Ligarium::Table::Property);
 
-  QVERIFY(registry.contains(ApplicationTable::Property));
+  QVERIFY(registry.contains(Ligarium::Table::Property));
 
-  QCOMPARE(registry.dump(ApplicationTable::Property, 42), QStringLiteral("Property(id=42)"));
+  QCOMPARE(registry.dump(Ligarium::Table::Property, 42), QStringLiteral("Property(id=42)"));
 }
 
 QTEST_MAIN(TestRecordRegistry)

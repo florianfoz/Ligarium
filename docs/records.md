@@ -15,7 +15,7 @@ class Property : public Ligarium::Record<Property>
 {
 public:
     static constexpr Ligarium::Table static_table =
-        ApplicationTable::Property;
+        Ligarium::Table::Property;
 
     QString name;
     double surface = 0.0;

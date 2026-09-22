@@ -9,7 +9,7 @@ A record registry can associate a table with operations such as record dumping.
 Conceptually:
 
 ```text
-ApplicationTable::Property
+Ligarium::Table::Property
           │
           ▼
     RecordRegistry

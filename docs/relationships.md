@@ -57,7 +57,7 @@ For example:
 link_ManyToMany(
     u"tenants",
     &Property::tenants,
-    ApplicationTable::PropertyTenant,
+    Ligarium::Table::PropertyTenant,
     u"property_id",
     u"tenant_id"
 );

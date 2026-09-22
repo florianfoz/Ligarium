@@ -94,7 +94,7 @@ target_compile_options(Ligarium
 The configuration header defines:
 
 ```cpp
-#define LIGARIUM_TABLE_TYPE ApplicationTable
+#define LIGARIUM_TABLE_TYPE Ligarium::Table
 ```
 
 ## Tests target generation

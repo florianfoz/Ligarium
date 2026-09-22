@@ -58,7 +58,7 @@ For example:
 
 ```cpp
 auto result = db.find(
-    ApplicationTable::Property,
+    Ligarium::Table::Property,
     property_id
 );
 

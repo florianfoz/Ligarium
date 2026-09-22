@@ -1,4 +1,4 @@
-#include "test_config.h"
+#include "ligarium_config.h"
 //
 
 #include "link.h"

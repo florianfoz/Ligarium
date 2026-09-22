@@ -7,20 +7,20 @@
 //
 #include <QSqlDatabase>
 
-#ifndef LIGARIUM_TABLE_TYPE
-#error LIGARIUM_TABLE_TYPE macro must be defined to use Ligarium!
-#define LIGARIUM_TABLE_TYPE enum class _T_ : uint8_t {};
-#endif
+// #ifndef LIGARIUM_TABLE_TYPE
+// #error LIGARIUM_TABLE_TYPE macro must be defined to use Ligarium!
+// #define LIGARIUM_TABLE_TYPE enum class _T_ : uint8_t {};
+// #endif
 
 
 namespace Ligarium
 {
 
+enum class Table;
+
 class Database;
 
 constexpr qsizetype INVALID_ID = -1;
-
-using Table = LIGARIUM_TABLE_TYPE;
 
 QString Table_to_str(Table table);
 

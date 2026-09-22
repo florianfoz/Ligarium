@@ -161,8 +161,8 @@ if(LIGARIUM_BUILD_TESTS)
 
     target_compile_options(Ligarium
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU,Clang>:-include${CMAKE_CURRENT_SOURCE_DIR}/tests/test_config.h>
-        $<$<CXX_COMPILER_ID:MSVC>:/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/test_config.h>
+        $<$<CXX_COMPILER_ID:GNU,Clang>:-include${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
+        $<$<CXX_COMPILER_ID:MSVC>:/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
     )
 
 

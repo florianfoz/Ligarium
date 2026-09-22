@@ -1,4 +1,4 @@
-#include "test_config.h"
+#include "ligarium_config.h"
 //
 
 #include "database.h"
@@ -16,12 +16,9 @@
 class Property final : public Ligarium::Record<Property>
 {
 public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
+  using Ligarium::Record<Property>::Record;
 
-  explicit Property(Ligarium::Database* db = nullptr)
-    : Record(db)
-  {
-  }
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
 
   QString name;
 
@@ -48,12 +45,9 @@ public:
 class Tenant final : public Ligarium::Record<Tenant>
 {
 public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Tenant;
+  using Ligarium::Record<Tenant>::Record;
 
-  explicit Tenant(Ligarium::Database* db = nullptr)
-    : Record(db)
-  {
-  }
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Tenant;
 
   QString name;
 
@@ -80,12 +74,9 @@ public:
 class Attachment final : public Ligarium::Record<Attachment>
 {
 public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Attachment;
+  using Ligarium::Record<Attachment>::Record;
 
-  explicit Attachment(Ligarium::Database* db = nullptr)
-    : Record(db)
-  {
-  }
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Attachment;
 
   Ligarium::Table table = Ligarium::Table::Property;
 

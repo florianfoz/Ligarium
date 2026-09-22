@@ -9,12 +9,12 @@ The application provides its own table enumeration and exposes it to Ligarium th
 For example:
 
 ```cpp
-DEFINE_ENUM(ApplicationTable, int,
+DEFINE_ENUM(Ligarium::Table, int,
             Property, 1,
             Tenant, 2,
             Attachment, 3)
 
-#define LIGARIUM_TABLE_TYPE ApplicationTable
+#define LIGARIUM_TABLE_TYPE Ligarium::Table
 ```
 
 Ligarium then uses:
@@ -61,12 +61,12 @@ A typical application configuration header is:
 #define ENUMLITE_DEFAULT_BACKEND enumlite::qt_backend
 #include <enumlite/enumlite.h>
 
-DEFINE_ENUM(ApplicationTable, int,
+DEFINE_ENUM(Ligarium::Table, int,
             Property, 1,
             Tenant, 2,
             Attachment, 3)
 
-#define LIGARIUM_TABLE_TYPE ApplicationTable
+#define LIGARIUM_TABLE_TYPE Ligarium::Table
 
 #endif
 ```
@@ -101,7 +101,7 @@ namespace Ligarium
 
 inline QString Table_to_str(Table table)
 {
-    return ApplicationTable_to_str(table);
+    return Ligarium::Table_to_str(table);
 }
 
 }

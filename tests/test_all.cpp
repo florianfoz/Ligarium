@@ -1,5 +1,5 @@
 
-#include "test_config.h"
+#include "ligarium_config.h"
 //
 #include "database.h"
 #include "field.h"
@@ -23,7 +23,7 @@ namespace
 class Property : public Ligarium::Record<Property>
 {
 public:
-  static constexpr Ligarium::Table static_table = ApplicationTable::Property;
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
 
   QString name;
   double  surface = 0.0;
@@ -56,7 +56,7 @@ public:
 class Tenant : public Ligarium::Record<Tenant>
 {
 public:
-  static constexpr Ligarium::Table static_table = ApplicationTable::Tenant;
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Tenant;
 
   QString name;
 
@@ -87,7 +87,7 @@ public:
 class Attachment : public Ligarium::Record<Attachment>
 {
 public:
-  static constexpr Ligarium::Table static_table = ApplicationTable::Attachment;
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Attachment;
 
   Ligarium::Table table{};
   qsizetype       col_id = Ligarium::INVALID_ID;
@@ -204,7 +204,7 @@ void TestAll::database_and_records()
     QVERIFY(property.delete_record());
     QVERIFY(!property.is_valid());
 
-    QVERIFY(!Ligarium::contains_record(db, ApplicationTable::Property, property_id));
+    QVERIFY(!Ligarium::contains_record(db, Ligarium::Table::Property, property_id));
   }
 
   QSqlDatabase::removeDatabase(connection_name);
@@ -310,42 +310,42 @@ void TestAll::record_registry()
 {
   Ligarium::RecordRegistry registry(m_db);
 
-  Ligarium::register_record<Property>(registry, ApplicationTable::Property);
+  Ligarium::register_record<Property>(registry, Ligarium::Table::Property);
 
-  Ligarium::register_record<Tenant>(registry, ApplicationTable::Tenant);
+  Ligarium::register_record<Tenant>(registry, Ligarium::Table::Tenant);
 
-  QVERIFY(registry.contains(ApplicationTable::Property));
+  QVERIFY(registry.contains(Ligarium::Table::Property));
 
-  QVERIFY(registry.contains(ApplicationTable::Tenant));
+  QVERIFY(registry.contains(Ligarium::Table::Tenant));
 
-  QVERIFY(!registry.contains(ApplicationTable::Attachment));
+  QVERIFY(!registry.contains(Ligarium::Table::Attachment));
 
-  QCOMPARE(registry.dump(ApplicationTable::Property, 12), QStringLiteral("Property(id=12, name=)"));
+  QCOMPARE(registry.dump(Ligarium::Table::Property, 12), QStringLiteral("Property(id=12, name=)"));
 
-  QCOMPARE(registry.dump(ApplicationTable::Tenant, 7), QStringLiteral("Tenant(id=7, name=)"));
+  QCOMPARE(registry.dump(Ligarium::Table::Tenant, 7), QStringLiteral("Tenant(id=7, name=)"));
 
-  QCOMPARE(registry.dump(ApplicationTable::Attachment, 1), QString{});
+  QCOMPARE(registry.dump(Ligarium::Table::Attachment, 1), QString{});
 
   registry.clear();
 
-  QVERIFY(!registry.contains(ApplicationTable::Property));
+  QVERIFY(!registry.contains(Ligarium::Table::Property));
 
-  QVERIFY(!registry.contains(ApplicationTable::Tenant));
+  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
 }
 
 void TestAll::widget_registry()
 {
   Ligarium::WidgetRegistry registry;
 
-  Ligarium::register_widget<PropertyWidget>(registry, ApplicationTable::Property);
+  Ligarium::register_widget<PropertyWidget>(registry, Ligarium::Table::Property);
 
-  QVERIFY(registry.contains(ApplicationTable::Property));
+  QVERIFY(registry.contains(Ligarium::Table::Property));
 
-  QVERIFY(!registry.contains(ApplicationTable::Tenant));
+  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
 
   QWidget parent;
 
-  QWidget* widget = registry.create(ApplicationTable::Property, 42, &parent);
+  QWidget* widget = registry.create(Ligarium::Table::Property, 42, &parent);
 
   QVERIFY(widget != nullptr);
   QCOMPARE(widget->parentWidget(), &parent);
@@ -359,9 +359,9 @@ void TestAll::widget_registry()
 
   registry.clear();
 
-  QVERIFY(!registry.contains(ApplicationTable::Property));
+  QVERIFY(!registry.contains(Ligarium::Table::Property));
 
-  QVERIFY(registry.create(ApplicationTable::Property, 42) == nullptr);
+  QVERIFY(registry.create(Ligarium::Table::Property, 42) == nullptr);
 }
 
 void TestAll::complete_workflow()
@@ -412,22 +412,22 @@ void TestAll::complete_workflow()
 
     Ligarium::RecordRegistry record_registry(&db);
 
-    record_registry.register_record(ApplicationTable::Property, [&record_registry](qsizetype id) {
+    record_registry.register_record(Ligarium::Table::Property, [&record_registry](qsizetype id) {
       const Property property = Property::read_record(*record_registry.database(), id);
 
       return property.dump();
     });
 
-    QCOMPARE(record_registry.dump(ApplicationTable::Property, property.id()),
+    QCOMPARE(record_registry.dump(Ligarium::Table::Property, property.id()),
              QStringLiteral("Property(id=%1, name=Main house)").arg(property.id()));
 
     Ligarium::WidgetRegistry widget_registry;
 
-    Ligarium::register_widget<PropertyWidget>(widget_registry, ApplicationTable::Property);
+    Ligarium::register_widget<PropertyWidget>(widget_registry, Ligarium::Table::Property);
 
     QWidget parent;
 
-    std::unique_ptr<QWidget> widget(widget_registry.create(ApplicationTable::Property, property.id(), &parent));
+    std::unique_ptr<QWidget> widget(widget_registry.create(Ligarium::Table::Property, property.id(), &parent));
 
     QVERIFY(widget != nullptr);
 
