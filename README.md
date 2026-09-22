@@ -15,7 +15,7 @@ class Property : public Ligarium::Record<Property>
 {
 public:
     static constexpr Ligarium::Table static_table =
-        ApplicationTable::Property;
+        Ligarium::Table::Property;
 
     QString name;
     double surface = 0.0;
@@ -35,7 +35,7 @@ Ligarium uses this compile-time metadata to connect the C++ model to an SQL data
 ```text
 Application
     │
-    ├── ApplicationTable
+    ├── Ligarium::Table
     ├── Record types
     ├── Fields
     └── Relationships
@@ -85,11 +85,11 @@ Application
 An application first defines its table type:
 
 ```cpp
-DEFINE_ENUM(ApplicationTable, int,
+DEFINE_ENUM(Ligarium::Table, int,
             Property, 1,
             Tenant, 2)
 
-#define LIGARIUM_TABLE_TYPE ApplicationTable
+#define LIGARIUM_TABLE_TYPE Ligarium::Table
 ```
 
 Then a record can be defined:
@@ -99,7 +99,7 @@ class Tenant : public Ligarium::Record<Tenant>
 {
 public:
     static constexpr Ligarium::Table static_table =
-        ApplicationTable::Tenant;
+        Ligarium::Table::Tenant;
 
     QString name;
 
@@ -157,11 +157,11 @@ ctest --test-dir build/debug --output-on-failure
 Define your application's tables:
 
 ```cpp
-DEFINE_ENUM(ApplicationTable, int,
+DEFINE_ENUM(Ligarium::Table, int,
             Property, 1,
             Tenant, 2)
 
-#define LIGARIUM_TABLE_TYPE ApplicationTable
+#define LIGARIUM_TABLE_TYPE Ligarium::Table
 ```
 
 Define a record:
@@ -171,7 +171,7 @@ class Property : public Ligarium::Record<Property>
 {
 public:
     static constexpr Ligarium::Table static_table =
-        ApplicationTable::Property;
+        Ligarium::Table::Property;
 
     QString name;
 

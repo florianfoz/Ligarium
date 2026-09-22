@@ -37,7 +37,7 @@ class Attachment
 {
 public:
     static constexpr Ligarium::Table static_table =
-        ApplicationTable::Attachment;
+        Ligarium::Table::Attachment;
 
     Ligarium::Table table;
     qsizetype col_id;
