@@ -151,6 +151,70 @@ cmake --build --preset build-debug-linux
 ctest --test-dir build/debug --output-on-failure
 ```
 
+## Quick Start
+
+Define your application's tables:
+
+```cpp
+DEFINE_ENUM(ApplicationTable, int,
+            Property, 1,
+            Tenant, 2)
+
+#define LIGARIUM_TABLE_TYPE ApplicationTable
+```
+
+Define a record:
+
+```cpp
+class Property : public Ligarium::Record<Property>
+{
+public:
+    static constexpr Ligarium::Table static_table =
+        ApplicationTable::Property;
+
+    QString name;
+
+    Property(Ligarium::Database* db = nullptr)
+        : Record(db)
+    {
+    }
+
+    static constexpr auto sql_fields()
+    {
+        return std::tuple{
+            Ligarium::field(u"name", &Property::name),
+        };
+    }
+};
+```
+
+Open a Qt SQL connection and use the record API:
+
+```cpp
+QSqlDatabase connection =
+    QSqlDatabase::addDatabase("QSQLITE");
+
+connection.setDatabaseName("app.db");
+connection.open();
+
+Ligarium::Database db(connection);
+
+Property property = Property::create_record(db);
+property.name = "My property";
+property.save_record();
+```
+
+For the complete configuration and build setup, see [Configuration](docs/configuration.md) and [CMake](docs/cmake.md).
+
+# AI-assisted development
+
+Parts of `Ligarium` have been developed with the assistance of AI tools.
+
+AI-generated or AI-assisted code is reviewed and validated before publication. This includes manual code review and automated validation through the project's test suite.
+
+AI assistance does not replace the project's verification process: changes are expected to compile successfully and pass the relevant tests before being published.
+
+
 ## Project status
 
 Ligarium is currently **pre-1.0 and under active development**.
