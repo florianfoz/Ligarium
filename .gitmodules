@@ -1,0 +1,3 @@
+[submodule "external/enumlite"]
+	path = external/enumlite
+	url = https://github.com/florianfoz/enumlite.git
