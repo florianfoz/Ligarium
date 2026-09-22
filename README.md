@@ -62,8 +62,10 @@ Application
 * Polymorphic relationships
 * Qt SQL integration
 * SQLite support
+* SQLite schema generation from user records
 * QtTest-based test suite
 * Apache-2.0 licensed
+
 
 ## Documentation
 
@@ -79,52 +81,6 @@ Application
 | [Registries](docs/registries.md)                 | Record and GUI registries                     |
 | [Testing](docs/testing.md)                       | Test architecture and QtTest                  |
 | [CMake](docs/cmake.md)                           | Building and integrating Ligarium             |
-
-## Minimal model
-
-An application first defines its table type:
-
-```cpp
-DEFINE_ENUM(Ligarium::Table, int,
-            Property, 1,
-            Tenant, 2)
-
-#define LIGARIUM_TABLE_TYPE Ligarium::Table
-```
-
-Then a record can be defined:
-
-```cpp
-class Tenant : public Ligarium::Record<Tenant>
-{
-public:
-    static constexpr Ligarium::Table static_table =
-        Ligarium::Table::Tenant;
-
-    QString name;
-
-    Tenant(Ligarium::Database* db = nullptr)
-        : Record(db)
-    {
-    }
-
-    static constexpr auto sql_fields()
-    {
-        return std::tuple{
-            Ligarium::field(u"name", &Tenant::name),
-        };
-    }
-};
-```
-
-And persisted through the record API:
-
-```cpp
-Tenant tenant = Tenant::create_record(db);
-
-tenant.name = u"John Doe";
-tenant.save_record();
-```
 
 ## Build
 
@@ -152,51 +108,91 @@ ctest --test-dir build/debug --output-on-failure
 ```
 
 ## Quick Start
+See [INSTALLATION.md](/INSTALLATION.md)
+
 > Please note that the project is currently under development, **and not all tests are passing yet**.
 
-Define your application's tables:
+> this project use https://github.com/florianfoz/enumlite for enum reflexion
+
+Define your configuraition, by create `ligarium_config.h`:
 
 ```cpp
-DEFINE_ENUM(Ligarium::Table, int,
-            Property, 1,
-            Tenant, 2)
+#ifndef LIGARIUM_CONFIG_H
+#define LIGARIUM_CONFIG_H
 
-#define LIGARIUM_TABLE_TYPE Ligarium::Table
+#include <enumlite/enumlite_backend_qt.h>
+#define ENUMLITE_DEFAULT_BACKEND enumlite::qt_backend
+#include <enumlite/enumlite.h>
+
+namespace Ligarium
+{
+
+DEFINE_ENUM(Table, int,   // user defined table
+            Property, 1,  //
+            Tenant, 2,    //
+            Attachment, 3 //
+)
+
+} // namespace Ligarium
+
+
+#include <ligarium.h>
+
+#endif // LIGARIUM_CONFIG_H
 ```
+It is define the table to use and set `enumlite` with the `qt_backend` to be fully in the qt toolchain
+
+**Include `ligarium_config.h` always before any ligarium file!**
 
 Define a record:
 
 ```cpp
-class Property : public Ligarium::Record<Property>
+
+class Property final : public Ligarium::Record<Property>
 {
 public:
-    static constexpr Ligarium::Table static_table =
-        Ligarium::Table::Property;
+  using Ligarium::Record<Property>::Record;
 
-    QString name;
+  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
 
-    Property(Ligarium::Database* db = nullptr)
-        : Record(db)
-    {
-    }
+  QString name;
 
-    static constexpr auto sql_fields()
-    {
-        return std::tuple{
-            Ligarium::field(u"name", &Property::name),
-        };
-    }
+  [[nodiscard]]
+  QString dump() const override
+  {
+    return name;
+  }
+
+  static constexpr auto sql_fields()
+  {
+    return std::tuple{
+        Ligarium::field(u"name", &Property::name) //
+    };
+  }
+
+  friend bool operator==(const Property& lhs, const Property& rhs)
+  {
+    return lhs.id() == rhs.id() && lhs.name == rhs.name;
+  }
 };
 ```
 
 Open a Qt SQL connection and use the record API:
 
 ```cpp
-QSqlDatabase connection =
-    QSqlDatabase::addDatabase("QSQLITE");
+const QString connection_name = "test_all_database_records";
 
-connection.setDatabaseName("app.db");
-connection.open();
+QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
+
+connection.setDatabaseName(QStringLiteral(":memory:"));
+
+QVERIFY(connection.open());
+
+Ligarium::SchemaBuilder schema(connection);
+
+if (!schema.create_all<Property, Tenant, Attachment>()) {
+  qPrintable(schema.last_error());
+}
 
 Ligarium::Database db(connection);
 
