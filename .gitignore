@@ -9,7 +9,7 @@
 *.so.*
 *.dll
 *.dylib
-external/
+/external
 *.log
 
 # Qt-es
