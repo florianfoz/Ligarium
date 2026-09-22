@@ -152,6 +152,7 @@ ctest --test-dir build/debug --output-on-failure
 ```
 
 ## Quick Start
+> Please note that the project is currently under development, **and not all tests are passing yet**.
 
 Define your application's tables:
 
@@ -218,6 +219,8 @@ AI assistance does not replace the project's verification process: changes are e
 ## Project status
 
 Ligarium is currently **pre-1.0 and under active development**.
+
+**NOT all tests are passing yet**.
 
 The API may evolve, particularly around relationship handling, polymorphic relationships, registries, and database integration.
 
