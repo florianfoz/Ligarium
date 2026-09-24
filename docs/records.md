@@ -3,7 +3,7 @@
 A persistent model is represented by a class derived from:
 
 ```cpp
-Ligarium::Record<T>
+ligarium::Record<T>
 ```
 
 where `T` is the derived class.
@@ -11,16 +11,16 @@ where `T` is the derived class.
 ## Defining a record
 
 ```cpp
-class Property : public Ligarium::Record<Property>
+class Property : public ligarium::Record<Property>
 {
 public:
-    static constexpr Ligarium::Table static_table =
-        Ligarium::Table::Property;
+    static constexpr auto static_table =
+        ligarium::Table::Property;
 
     QString name;
     double surface = 0.0;
 
-    Property(Ligarium::Database* db = nullptr)
+    Property(ligarium::Database* db = nullptr)
         : Record(db)
     {
     }
@@ -28,8 +28,8 @@ public:
     static constexpr auto sql_fields()
     {
         return std::tuple{
-            Ligarium::field(u"name", &Property::name),
-            Ligarium::field(u"surface", &Property::surface),
+            ligarium::field(u"name", &Property::name),
+            ligarium::field(u"surface", &Property::surface),
         };
     }
 };
@@ -53,7 +53,7 @@ qsizetype id() const;
 A new record has:
 
 ```cpp
-Ligarium::INVALID_ID
+ligarium::INVALID_ID
 ```
 
 as its identifier.
@@ -76,7 +76,7 @@ or:
 
 ```cpp
 Property property =
-    Ligarium::read_record<Property>(db, property_id);
+    ligarium::read_record<Property>(db, property_id);
 ```
 
 ## Saving

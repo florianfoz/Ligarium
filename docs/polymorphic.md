@@ -33,13 +33,13 @@ A typical record can contain:
 
 ```cpp
 class Attachment
-    : public Ligarium::Record<Attachment>
+    : public ligarium::Record<Attachment>
 {
 public:
-    static constexpr Ligarium::Table static_table =
-        Ligarium::Table::Attachment;
+    static constexpr auto static_table =
+        ligarium::Table::Attachment;
 
-    Ligarium::Table table;
+    ligarium::Table table;
     qsizetype col_id;
     QString path;
 };

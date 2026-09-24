@@ -1,10 +1,9 @@
 #include "ligarium_config.h"
 //
 
-#include "ligarium/widget_registry.h"
-
 #include <QTest>
 #include <QWidget>
+#include <ligarium/widget_registry.h>
 
 class PropertyWidget : public QWidget
 {
@@ -23,7 +22,7 @@ public:
   }
 
 private:
-  qsizetype m_id = Ligarium::INVALID_ID;
+  qsizetype m_id = ligarium::INVALID_ID;
 };
 
 class TestWidgetRegistry : public QObject
@@ -45,32 +44,32 @@ private slots:
 
 void TestWidgetRegistry::initially_empty()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  QVERIFY(!registry.contains(Ligarium::Table::Property));
-  QVERIFY(registry.create(Ligarium::Table::Property, 1) == nullptr);
+  QVERIFY(!registry.contains(ligarium::Table::Property));
+  QVERIFY(registry.create(ligarium::Table::Property, 1) == nullptr);
 }
 
 void TestWidgetRegistry::register_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property, [](qsizetype id, QWidget* parent) {
+  registry.register_widget(ligarium::Table::Property, [](qsizetype id, QWidget* parent) {
     auto* widget = new PropertyWidget(id, parent);
     return widget;
   });
 
-  QVERIFY(registry.contains(Ligarium::Table::Property));
+  QVERIFY(registry.contains(ligarium::Table::Property));
 }
 
 void TestWidgetRegistry::create_registered_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype id, QWidget* parent) { return new PropertyWidget(id, parent); });
 
-  QWidget* widget = registry.create(Ligarium::Table::Property, 42);
+  QWidget* widget = registry.create(ligarium::Table::Property, 42);
 
   QVERIFY(widget != nullptr);
 
@@ -84,26 +83,26 @@ void TestWidgetRegistry::create_registered_widget()
 
 void TestWidgetRegistry::create_unknown_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype id, QWidget* parent) { return new PropertyWidget(id, parent); });
 
-  QWidget* widget = registry.create(Ligarium::Table::Tenant, 42);
+  QWidget* widget = registry.create(ligarium::Table::Tenant, 42);
 
   QVERIFY(widget == nullptr);
 }
 
 void TestWidgetRegistry::create_with_parent()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype id, QWidget* parent) { return new PropertyWidget(id, parent); });
 
   QWidget parent;
 
-  QWidget* widget = registry.create(Ligarium::Table::Property, 42, &parent);
+  QWidget* widget = registry.create(ligarium::Table::Property, 42, &parent);
 
   QVERIFY(widget != nullptr);
   QCOMPARE(widget->parentWidget(), &parent);
@@ -118,34 +117,34 @@ void TestWidgetRegistry::create_with_parent()
 
 void TestWidgetRegistry::contains_registered_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype, QWidget* parent) { return new PropertyWidget(1, parent); });
 
-  QVERIFY(registry.contains(Ligarium::Table::Property));
-  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(registry.contains(ligarium::Table::Property));
+  QVERIFY(!registry.contains(ligarium::Table::Tenant));
 }
 
 void TestWidgetRegistry::contains_unknown_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  QVERIFY(!registry.contains(Ligarium::Table::Property));
-  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(!registry.contains(ligarium::Table::Property));
+  QVERIFY(!registry.contains(ligarium::Table::Tenant));
 }
 
 void TestWidgetRegistry::replace_registered_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype, QWidget* parent) { return new PropertyWidget(1, parent); });
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype id, QWidget* parent) { return new PropertyWidget(id + 100, parent); });
 
-  QWidget* widget = registry.create(Ligarium::Table::Property, 42);
+  QWidget* widget = registry.create(ligarium::Table::Property, 42);
 
   QVERIFY(widget != nullptr);
 
@@ -159,36 +158,36 @@ void TestWidgetRegistry::replace_registered_widget()
 
 void TestWidgetRegistry::clear_registry()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  registry.register_widget(Ligarium::Table::Property,
+  registry.register_widget(ligarium::Table::Property,
                            [](qsizetype id, QWidget* parent) { return new PropertyWidget(id, parent); });
 
-  registry.register_widget(Ligarium::Table::Tenant,
+  registry.register_widget(ligarium::Table::Tenant,
                            [](qsizetype id, QWidget* parent) { return new PropertyWidget(id, parent); });
 
-  QVERIFY(registry.contains(Ligarium::Table::Property));
-  QVERIFY(registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(registry.contains(ligarium::Table::Property));
+  QVERIFY(registry.contains(ligarium::Table::Tenant));
 
   registry.clear();
 
-  QVERIFY(!registry.contains(Ligarium::Table::Property));
-  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(!registry.contains(ligarium::Table::Property));
+  QVERIFY(!registry.contains(ligarium::Table::Tenant));
 
-  QVERIFY(registry.create(Ligarium::Table::Property, 1) == nullptr);
+  QVERIFY(registry.create(ligarium::Table::Property, 1) == nullptr);
 
-  QVERIFY(registry.create(Ligarium::Table::Tenant, 1) == nullptr);
+  QVERIFY(registry.create(ligarium::Table::Tenant, 1) == nullptr);
 }
 
 void TestWidgetRegistry::register_typed_widget()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  Ligarium::register_widget<PropertyWidget>(registry, Ligarium::Table::Property);
+  ligarium::register_widget<PropertyWidget>(registry, ligarium::Table::Property);
 
-  QVERIFY(registry.contains(Ligarium::Table::Property));
+  QVERIFY(registry.contains(ligarium::Table::Property));
 
-  QWidget* widget = registry.create(Ligarium::Table::Property, 42);
+  QWidget* widget = registry.create(ligarium::Table::Property, 42);
 
   QVERIFY(widget != nullptr);
 

@@ -11,7 +11,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Ligarium
+namespace ligarium
 {
 
 /**
@@ -62,7 +62,7 @@ struct SqlType<QDateTime> {
 };
 
 /**
- * @brief Generates SQLite tables from Ligarium record metadata.
+ * @brief Generates SQLite tables from ligarium record metadata.
  */
 class SchemaBuilder
 {
@@ -124,7 +124,7 @@ private:
   static QString quote(QStringView identifier)
   {
     QString result = QString(identifier);
-    result.replace('"', QStringLiteral("\"\""));
+    result.replace('"', "\"\"");
 
     return QStringLiteral("\"%1\"").arg(result);
   }
@@ -320,6 +320,6 @@ bool create_schema(QSqlDatabase database)
   return schema.create_all<RECORDS...>();
 }
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // LIGARIUM_SCHEMA_H

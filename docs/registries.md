@@ -9,7 +9,7 @@ A record registry can associate a table with operations such as record dumping.
 Conceptually:
 
 ```text
-Ligarium::Table::Property
+ligarium::Table::Property
           │
           ▼
     RecordRegistry
@@ -34,7 +34,7 @@ Compile-time metadata is useful for persistence, but some application features r
 For example, an application may receive:
 
 ```cpp
-Ligarium::Table table;
+ligarium::Table table;
 qsizetype id;
 ```
 

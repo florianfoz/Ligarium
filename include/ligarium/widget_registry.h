@@ -8,7 +8,7 @@
 #include <functional>
 #include <utility>
 
-namespace Ligarium
+namespace ligarium
 {
 
 class WidgetRegistry
@@ -64,6 +64,6 @@ void register_widget(WidgetRegistry& registry, Table table)
   registry.register_widget(table, [](qsizetype id, QWidget* parent) { return new TWidget(id, parent); });
 }
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // WIDGET_REGISTRY_H

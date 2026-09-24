@@ -4,7 +4,7 @@
 #include <QSqlDatabase>
 
 
-namespace Ligarium
+namespace ligarium
 {
 
 enum class Table : uint8_t; // user must define
@@ -49,6 +49,6 @@ template <class T>
 concept RecordFieldType = std::derived_from<T, Record<T>> && RecordFieldDerivedType<T>;
 
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // LIGARIUM_H

@@ -1,9 +1,9 @@
-#include "database.h"
+#include "ligarium/database.h"
 
 #include <QDebug>
 #include <QSqlError>
 
-namespace Ligarium
+namespace ligarium
 {
 
 Database::Database(QSqlDatabase database)
@@ -34,7 +34,7 @@ qsizetype Database::last_insert_id() const
 {
   QSqlQuery query(m_database);
 
-  if (!query.exec(QStringLiteral("SELECT last_insert_rowid()"))) {
+  if (!query.exec("SELECT last_insert_rowid()")) {
     qCritical() << "Failed to retrieve last insert ID:" << query.lastError().text();
 
     return INVALID_ID;
@@ -64,7 +64,7 @@ bool Database::contains(Table table, qsizetype record_id) const
     return false;
   }
 
-  query.bindValue(QStringLiteral(":id"), record_id);
+  query.bindValue(":id", record_id);
 
   if (!execute(query)) return false;
 
@@ -83,7 +83,7 @@ std::optional<QSqlQuery> Database::find(Table table, qsizetype record_id) const
     return std::nullopt;
   }
 
-  query.bindValue(QStringLiteral(":id"), record_id);
+  query.bindValue(":id", record_id);
 
   if (!execute(query)) return std::nullopt;
 
@@ -139,13 +139,13 @@ qsizetype Database::record_id(Table table, const QString& column, const QVariant
     return INVALID_ID;
   }
 
-  query.bindValue(QStringLiteral(":value"), value);
+  query.bindValue(":value", value);
 
   if (!execute(query)) return INVALID_ID;
 
   if (!query.next()) return INVALID_ID;
 
-  return query.value(QStringLiteral("id")).toLongLong();
+  return query.value("id").toLongLong();
 }
 
 bool Database::is_valid_column(Table table, const QString& column) const
@@ -164,7 +164,7 @@ bool Database::is_valid_column(Table table, const QString& column) const
     return false;
   }
 
-  query.bindValue(QStringLiteral(":column"), column);
+  query.bindValue(":column", column);
 
   if (!execute(query)) return false;
 
@@ -204,8 +204,8 @@ bool Database::save(Table table, qsizetype record_id, const QString& column, con
     return false;
   }
 
-  query.bindValue(QStringLiteral(":value"), value);
-  query.bindValue(QStringLiteral(":id"), record_id);
+  query.bindValue(":value", value);
+  query.bindValue(":id", record_id);
 
   if (!execute(query)) return false;
 
@@ -224,7 +224,7 @@ bool Database::remove(Table table, qsizetype record_id) const
     return false;
   }
 
-  query.bindValue(QStringLiteral(":id"), record_id);
+  query.bindValue(":id", record_id);
 
   if (!execute(query)) return false;
 
@@ -236,4 +236,4 @@ QString Database::table_name(Table table)
   return Table_to_str(table);
 }
 
-} // namespace Ligarium
+} // namespace ligarium

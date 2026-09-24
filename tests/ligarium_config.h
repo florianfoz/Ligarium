@@ -3,7 +3,7 @@
 
 #include <QString>
 
-namespace Ligarium
+namespace ligarium
 {
 
 // user defined table
@@ -14,7 +14,7 @@ enum class Table : uint8_t {
 };
 
 [[nodiscard]]
-QString Table_to_str(Table table)
+inline QString Table_to_str(Table table)
 {
   switch (table) {
   case Table::Property:   return "Property";
@@ -23,9 +23,9 @@ QString Table_to_str(Table table)
   }
 }
 
-} // namespace Ligarium
+} // namespace ligarium
 
-// must be included always before user ligarium_config.h file
+// must be included before user ligarium_config.h file
 #include <ligarium/ligarium.h>
 
 #endif // LIGARIUM_CONFIG_H

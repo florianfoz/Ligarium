@@ -1,10 +1,6 @@
 #include "ligarium_config.h"
 //
 
-#include "ligarium/database.h"
-#include "ligarium/field.h"
-#include "ligarium/record.h"
-#include "ligarium/schema.h"
 #include "test_records.h"
 
 #include <QSqlDatabase>
@@ -12,6 +8,10 @@
 #include <QSqlQuery>
 #include <QtTest>
 #include <cstdint>
+#include <ligarium/database.h>
+#include <ligarium/field.h>
+#include <ligarium/record.h>
+#include <ligarium/schema.h>
 #include <memory>
 
 
@@ -21,27 +21,27 @@ class TestRecord : public QObject
 
 private:
   QSqlDatabase                        m_sql_database;
-  std::unique_ptr<Ligarium::Database> m_database;
+  std::unique_ptr<ligarium::Database> m_database;
 
 private slots:
 
   void initTestCase()
   {
-    const QString connection_name = QStringLiteral("ligarium_record_test");
+    const QString connection_name = "ligarium_record_test";
 
-    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(":memory:");
 
     QVERIFY(connection.open());
 
-    Ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_database = std::make_unique<Ligarium::Database>(connection);
+    m_database = std::make_unique<ligarium::Database>(connection);
   }
 
   void cleanupTestCase()
@@ -58,18 +58,18 @@ private slots:
 
   void recordType()
   {
-    static_assert(Ligarium::RecordType<Property>);
+    static_assert(ligarium::RecordType<Property>);
 
-    static_assert(Ligarium::RecordType<Tenant>);
+    static_assert(ligarium::RecordType<Tenant>);
 
-    static_assert(Ligarium::RecordType<Attachment>);
+    static_assert(ligarium::RecordType<Attachment>);
   }
 
   void defaultState()
   {
     Property property;
 
-    QCOMPARE(property.id(), Ligarium::INVALID_ID);
+    QCOMPARE(property.id(), ligarium::INVALID_ID);
 
     QCOMPARE(property.database(), nullptr);
 
@@ -90,7 +90,7 @@ private slots:
 
     QCOMPARE(property.database(), m_database.get());
 
-    QCOMPARE(property.id(), Ligarium::INVALID_ID);
+    QCOMPARE(property.id(), ligarium::INVALID_ID);
 
     QVERIFY(!property.is_valid());
 
@@ -99,24 +99,24 @@ private slots:
 
   void tableMapping()
   {
-    QCOMPARE(Property::static_table, Ligarium::Table::Property);
+    QCOMPARE(Property::static_table, ligarium::Table::Property);
 
-    QCOMPARE(Tenant::static_table, Ligarium::Table::Tenant);
+    QCOMPARE(Tenant::static_table, ligarium::Table::Tenant);
 
-    QCOMPARE(Attachment::static_table, Ligarium::Table::Attachment);
+    QCOMPARE(Attachment::static_table, ligarium::Table::Attachment);
 
-    QCOMPARE(Ligarium::Table_to_str(Ligarium::Table::Property), QStringLiteral("property"));
+    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Property), "property");
 
-    QCOMPARE(Ligarium::Table_to_str(Ligarium::Table::Tenant), QStringLiteral("tenant"));
+    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Tenant), "tenant");
 
-    QCOMPARE(Ligarium::Table_to_str(Ligarium::Table::Attachment), QStringLiteral("attachment"));
+    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Attachment), "attachment");
   }
 
   void createRecord()
   {
     const Property property = Property::create_record(*m_database);
 
-    QVERIFY(property.id() != Ligarium::INVALID_ID);
+    QVERIFY(property.id() != ligarium::INVALID_ID);
 
     QVERIFY(property.is_valid());
 
@@ -129,8 +129,8 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) "
-                                       "VALUES ('House')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) "
+                        "VALUES ('House')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
@@ -139,7 +139,7 @@ private slots:
 
     QCOMPARE(property.id(), id);
 
-    QCOMPARE(property.name, QStringLiteral("House"));
+    QCOMPARE(property.name, "House");
 
     QVERIFY(property.is_valid());
 
@@ -148,98 +148,98 @@ private slots:
 
   void readInvalidRecord()
   {
-    const Property property = Property::read_record(*m_database, Ligarium::INVALID_ID);
+    const Property property = Property::read_record(*m_database, ligarium::INVALID_ID);
 
-    QCOMPARE(property.id(), Ligarium::INVALID_ID);
+    QCOMPARE(property.id(), ligarium::INVALID_ID);
   }
 
   void allRecords()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("DELETE FROM property")), qPrintable(query.lastError().text()));
+    QVERIFY2(query.exec("DELETE FROM property"), qPrintable(query.lastError().text()));
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) VALUES "
-                                       "('House'), "
-                                       "('Apartment'), "
-                                       "('Office')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
+                        "('House'), "
+                        "('Apartment'), "
+                        "('Office')"),
              qPrintable(query.lastError().text()));
 
     const QList<Property> properties = Property::all_records(*m_database);
 
     QCOMPARE(properties.size(), 3);
 
-    QCOMPARE(properties.at(0).name, QStringLiteral("House"));
+    QCOMPARE(properties.at(0).name, "House");
 
-    QCOMPARE(properties.at(1).name, QStringLiteral("Apartment"));
+    QCOMPARE(properties.at(1).name, "Apartment");
 
-    QCOMPARE(properties.at(2).name, QStringLiteral("Office"));
+    QCOMPARE(properties.at(2).name, "Office");
   }
 
   void allRecordIds()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("DELETE FROM property")), qPrintable(query.lastError().text()));
+    QVERIFY2(query.exec("DELETE FROM property"), qPrintable(query.lastError().text()));
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) VALUES "
-                                       "('House'), "
-                                       "('Apartment')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
+                        "('House'), "
+                        "('Apartment')"),
              qPrintable(query.lastError().text()));
 
     const QList<qsizetype> ids = Property::all_records_id(*m_database);
 
     QCOMPARE(ids.size(), 2);
 
-    QVERIFY(ids.at(0) != Ligarium::INVALID_ID);
+    QVERIFY(ids.at(0) != ligarium::INVALID_ID);
 
-    QVERIFY(ids.at(1) != Ligarium::INVALID_ID);
+    QVERIFY(ids.at(1) != ligarium::INVALID_ID);
   }
 
   void saveNewRecord()
   {
     Property property(m_database.get());
 
-    property.name = QStringLiteral("House");
+    property.name = "House";
 
     QVERIFY(property.save_record());
 
-    QVERIFY(property.id() != Ligarium::INVALID_ID);
+    QVERIFY(property.id() != ligarium::INVALID_ID);
 
     QVERIFY(property.is_valid());
 
     const Property loaded = Property::read_record(*m_database, property.id());
 
-    QCOMPARE(loaded.name, QStringLiteral("House"));
+    QCOMPARE(loaded.name, "House");
   }
 
   void saveExistingRecord()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) "
-                                       "VALUES ('Before')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) "
+                        "VALUES ('Before')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
     Property property = Property::read_record(*m_database, id);
 
-    property.name = QStringLiteral("After");
+    property.name = "After";
 
     QVERIFY(property.save_record());
 
     const Property loaded = Property::read_record(*m_database, id);
 
-    QCOMPARE(loaded.name, QStringLiteral("After"));
+    QCOMPARE(loaded.name, "After");
   }
 
   void deleteRecord()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) "
-                                       "VALUES ('House')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) "
+                        "VALUES ('House')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
@@ -250,42 +250,42 @@ private slots:
 
     QVERIFY(property.delete_record());
 
-    QCOMPARE(property.id(), Ligarium::INVALID_ID);
+    QCOMPARE(property.id(), ligarium::INVALID_ID);
 
     QVERIFY(!property.is_valid());
 
-    QVERIFY(!Ligarium::contains_record(*m_database, Ligarium::Table::Property, id));
+    QVERIFY(!ligarium::contains_record(*m_database, ligarium::Table::Property, id));
   }
 
   void containsRecord()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO tenant (name) "
-                                       "VALUES ('John')")),
+    QVERIFY2(query.exec("INSERT INTO tenant (name) "
+                        "VALUES ('John')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
-    QVERIFY(Ligarium::contains_record(*m_database, Ligarium::Table::Tenant, id));
+    QVERIFY(ligarium::contains_record(*m_database, ligarium::Table::Tenant, id));
 
-    QVERIFY(!Ligarium::contains_record(*m_database, Ligarium::Table::Tenant, Ligarium::INVALID_ID));
+    QVERIFY(!ligarium::contains_record(*m_database, ligarium::Table::Tenant, ligarium::INVALID_ID));
   }
 
   void dump()
   {
     Property property(m_database.get());
 
-    property.name = QStringLiteral("House");
+    property.name = "House";
 
-    QCOMPARE(property.dump(), QStringLiteral("House"));
+    QCOMPARE(property.dump(), "House");
   }
 
   void dirtyNewRecord()
   {
     Property property(m_database.get());
 
-    property.name = QStringLiteral("Unsaved");
+    property.name = "Unsaved";
 
     QVERIFY(property.is_dirty());
   }
@@ -294,8 +294,8 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) "
-                                       "VALUES ('House')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) "
+                        "VALUES ('House')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
@@ -304,7 +304,7 @@ private slots:
 
     QVERIFY(!property.is_dirty());
 
-    property.name = QStringLiteral("Villa");
+    property.name = "Villa";
 
     QVERIFY(property.is_dirty());
   }
@@ -313,15 +313,15 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) VALUES "
-                                       "('House'), "
-                                       "('Villa')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
+                        "('House'), "
+                        "('Villa')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype first_id = query.lastInsertId().toLongLong();
 
-    QVERIFY2(query.exec(QStringLiteral("SELECT id FROM property "
-                                       "ORDER BY id DESC LIMIT 1")),
+    QVERIFY2(query.exec("SELECT id FROM property "
+                        "ORDER BY id DESC LIMIT 1"),
              qPrintable(query.lastError().text()));
 
     QVERIFY(query.next());
@@ -337,7 +337,7 @@ private slots:
   {
     Property property(m_database.get());
 
-    property.name = QStringLiteral("Unsaved");
+    property.name = "Unsaved";
 
     QCOMPARE(property.is_newer(), property.is_dirty());
   }
@@ -346,9 +346,9 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO attachment "
-                                       "(table, col_id, path) "
-                                       "VALUES (0, 42, '/tmp/document.pdf')")),
+    QVERIFY2(query.exec("INSERT INTO attachment "
+                        "(table, col_id, path) "
+                        "VALUES (0, 42, '/tmp/document.pdf')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
@@ -357,13 +357,13 @@ private slots:
 
     QCOMPARE(attachment.id(), id);
 
-    QCOMPARE(attachment.table, Ligarium::Table::Property);
+    QCOMPARE(attachment.table, ligarium::Table::Property);
 
     QCOMPARE(attachment.col_id, qsizetype(42));
 
-    QCOMPARE(attachment.path, QStringLiteral("/tmp/document.pdf"));
+    QCOMPARE(attachment.path, "/tmp/document.pdf");
 
-    QCOMPARE(attachment.dump(), QStringLiteral("/tmp/document.pdf"));
+    QCOMPARE(attachment.dump(), "/tmp/document.pdf");
   }
 };
 

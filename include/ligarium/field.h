@@ -14,7 +14,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace Ligarium
+namespace ligarium
 {
 
 void emit_on_record_saved(Database& db, Table table);
@@ -183,6 +183,6 @@ bool save_record_fields(QSqlQuery& query, const RECORD& record)
   return true;
 }
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // LIGARIUM_FIELD_H

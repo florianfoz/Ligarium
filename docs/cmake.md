@@ -3,7 +3,7 @@
 Ligarium uses modern CMake and exports the target:
 
 ```cmake
-Ligarium::Ligarium
+ligarium::Ligarium
 ```
 
 ## Requirements
@@ -59,7 +59,7 @@ Applications link against:
 ```cmake
 target_link_libraries(MyApplication
     PRIVATE
-        Ligarium::Ligarium
+        ligarium::Ligarium
 )
 ```
 
@@ -94,7 +94,7 @@ target_compile_options(Ligarium
 The configuration header defines:
 
 ```cpp
-#define LIGARIUM_TABLE_TYPE Ligarium::Table
+#define LIGARIUM_TABLE_TYPE ligarium::Table
 ```
 
 ## Tests target generation
@@ -116,7 +116,7 @@ foreach(TEST_SOURCE ${LIGARIUM_TEST_SOURCES})
 
     target_link_libraries(${TEST_NAME}
         PRIVATE
-            Ligarium::Ligarium
+            ligarium::Ligarium
             Qt6::Test
     )
 

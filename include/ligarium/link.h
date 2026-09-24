@@ -11,7 +11,7 @@
 
 class QSqlQuery;
 
-namespace Ligarium
+namespace ligarium
 {
 
 
@@ -45,7 +45,7 @@ public:
   [[nodiscard]]
   TARGET get(Database& db) const
   {
-    return Ligarium::read_record<TARGET>(db, m_id);
+    return ligarium::read_record<TARGET>(db, m_id);
   }
 
   friend bool operator==(const Link&, const Link&) = default;
@@ -81,7 +81,7 @@ public:
   [[nodiscard]]
   TARGET get(Database& db) const
   {
-    return Ligarium::read_record<TARGET>(db, m_id);
+    return ligarium::read_record<TARGET>(db, m_id);
   }
 
   friend bool operator==(const Link&, const Link&) = default;
@@ -133,7 +133,7 @@ public:
     records.reserve(m_ids.size());
 
     for (const qsizetype id : m_ids) {
-      records.append(Ligarium::read_record<TARGET>(db, id));
+      records.append(ligarium::read_record<TARGET>(db, id));
     }
 
     return records;
@@ -188,7 +188,7 @@ public:
     records.reserve(m_ids.size());
 
     for (const qsizetype id : m_ids) {
-      records.append(Ligarium::read_record<TARGET>(db, id));
+      records.append(ligarium::read_record<TARGET>(db, id));
     }
 
     return records;
@@ -315,6 +315,6 @@ bool save_link_ids(const Database& db, ERelation relation, const SqlLinkSpec& sp
 bool save_polymorphic_link(const Database& db, const SqlLinkSpec& spec, qsizetype owner_id,
                            const QVector<qsizetype>& target_ids);
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // LIGARIUM_LINK_H

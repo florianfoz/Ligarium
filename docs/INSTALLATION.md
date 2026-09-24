@@ -200,7 +200,7 @@ find_package(Ligarium REQUIRED)
 
 target_link_libraries(MyApplication
     PRIVATE
-        Ligarium::Ligarium
+        ligarium::Ligarium
 )
 ```
 
@@ -297,7 +297,7 @@ Ligarium provides `SchemaBuilder` to generate this schema from record metadata.
 For example:
 
 ```cpp
-Ligarium::SchemaBuilder schema(database);
+ligarium::SchemaBuilder schema(database);
 
 if (!schema.create_all<Property, Tenant, Attachment>()) {
     qFatal(
@@ -326,7 +326,7 @@ int main()
 Compile it against:
 
 ```text
-Ligarium::Ligarium
+ligarium::Ligarium
 ```
 
 If the application configures and links successfully, the basic Ligarium installation is available.

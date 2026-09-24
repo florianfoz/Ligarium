@@ -1,14 +1,14 @@
 #include "ligarium_config.h"
 
 //
-#include "ligarium/database.h"
-#include "ligarium/schema.h"
 #include "test_records.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QtTest/QtTest>
+#include <ligarium/database.h>
+#include <ligarium/schema.h>
 
 namespace
 {
@@ -21,7 +21,7 @@ class DatabaseTest : public QObject
 
 private:
   QSqlDatabase        m_connection;
-  Ligarium::Database* m_database = nullptr;
+  ligarium::Database* m_database = nullptr;
 
 private slots:
 
@@ -29,19 +29,19 @@ private slots:
   {
     QVERIFY2(QSqlDatabase::isDriverAvailable("QSQLITE"), "QSQLITE driver is not available");
 
-    m_connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    m_connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    m_connection.setDatabaseName(QStringLiteral(":memory:"));
+    m_connection.setDatabaseName(":memory:");
 
     QVERIFY(m_connection.open());
 
-    Ligarium::SchemaBuilder schema(m_connection);
+    ligarium::SchemaBuilder schema(m_connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_database = new Ligarium::Database(m_connection);
+    m_database = new ligarium::Database(m_connection);
   }
 
   void cleanupTestCase()
@@ -83,16 +83,16 @@ private slots:
 
   void insert()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
     QVERIFY(id > 0);
 
-    QVERIFY(m_database->contains(Ligarium::Table::Property, id));
+    QVERIFY(m_database->contains(ligarium::Table::Property, id));
   }
 
   void last_insert_id()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
     QVERIFY(id > 0);
 
@@ -101,23 +101,23 @@ private slots:
 
   void contains_existing_record()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
-    QVERIFY(m_database->contains(Ligarium::Table::Property, id));
+    QVERIFY(m_database->contains(ligarium::Table::Property, id));
   }
 
   void contains_missing_record()
   {
-    QVERIFY(!m_database->contains(Ligarium::Table::Property, 999999));
+    QVERIFY(!m_database->contains(ligarium::Table::Property, 999999));
   }
 
   void find_existing_record()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
     QVERIFY(id > 0);
 
-    auto result = m_database->find(Ligarium::Table::Property, id);
+    auto result = m_database->find(ligarium::Table::Property, id);
 
     QVERIFY(result.has_value());
 
@@ -130,7 +130,7 @@ private slots:
 
   void find_missing_record()
   {
-    const auto result = m_database->find(Ligarium::Table::Property, 999999);
+    const auto result = m_database->find(ligarium::Table::Property, 999999);
 
     QVERIFY(result.has_value());
 
@@ -150,7 +150,7 @@ private slots:
                    "('House B', 200), "
                    "('House C', 300)"));
 
-    const auto result = m_database->all(Ligarium::Table::Property);
+    const auto result = m_database->all(ligarium::Table::Property);
 
     QVERIFY(result.has_value());
 
@@ -173,7 +173,7 @@ private slots:
                    "('ID A'), "
                    "('ID B')"));
 
-    const auto result = m_database->all_ids(Ligarium::Table::Property);
+    const auto result = m_database->all_ids(ligarium::Table::Property);
 
     QVERIFY(result.has_value());
 
@@ -203,47 +203,47 @@ private slots:
 
     QVERIFY(query.exec());
 
-    const auto id = m_database->record_id(Ligarium::Table::Property, "name", "Unique Property");
+    const auto id = m_database->record_id(ligarium::Table::Property, "name", "Unique Property");
 
     QVERIFY(id > 0);
 
-    const auto id_by_surface = m_database->record_id(Ligarium::Table::Property, "surface", 456.75);
+    const auto id_by_surface = m_database->record_id(ligarium::Table::Property, "surface", 456.75);
 
     QCOMPARE(id_by_surface, id);
   }
 
   void record_id_missing_value()
   {
-    QCOMPARE(m_database->record_id(Ligarium::Table::Property, "name", "Does not exist"), Ligarium::INVALID_ID);
+    QCOMPARE(m_database->record_id(ligarium::Table::Property, "name", "Does not exist"), ligarium::INVALID_ID);
   }
 
   void record_id_invalid_column()
   {
-    QCOMPARE(m_database->record_id(Ligarium::Table::Property, "does_not_exist", "value"), Ligarium::INVALID_ID);
+    QCOMPARE(m_database->record_id(ligarium::Table::Property, "does_not_exist", "value"), ligarium::INVALID_ID);
   }
 
   void is_valid_column()
   {
-    QVERIFY(m_database->is_valid_column(Ligarium::Table::Property, "id"));
+    QVERIFY(m_database->is_valid_column(ligarium::Table::Property, "id"));
 
-    QVERIFY(m_database->is_valid_column(Ligarium::Table::Property, "name"));
+    QVERIFY(m_database->is_valid_column(ligarium::Table::Property, "name"));
 
-    QVERIFY(m_database->is_valid_column(Ligarium::Table::Property, "surface"));
+    QVERIFY(m_database->is_valid_column(ligarium::Table::Property, "surface"));
 
-    QVERIFY(m_database->is_valid_column(Ligarium::Table::Property, "active"));
+    QVERIFY(m_database->is_valid_column(ligarium::Table::Property, "active"));
 
-    QVERIFY(!m_database->is_valid_column(Ligarium::Table::Property, "unknown_column"));
+    QVERIFY(!m_database->is_valid_column(ligarium::Table::Property, "unknown_column"));
   }
 
   void save()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
     QVERIFY(id > 0);
 
-    QVERIFY(m_database->save(Ligarium::Table::Property, id, "name", "Saved property"));
+    QVERIFY(m_database->save(ligarium::Table::Property, id, "name", "Saved property"));
 
-    auto result = m_database->find(Ligarium::Table::Property, id);
+    auto result = m_database->find(ligarium::Table::Property, id);
 
     QVERIFY(result.has_value());
 
@@ -251,16 +251,16 @@ private slots:
 
     QVERIFY(query.next());
 
-    QCOMPARE(query.value("name").toString(), QStringLiteral("Saved property"));
+    QCOMPARE(query.value("name").toString(), "Saved property");
   }
 
   void save_numeric_value()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
-    QVERIFY(m_database->save(Ligarium::Table::Property, id, "surface", 123.45));
+    QVERIFY(m_database->save(ligarium::Table::Property, id, "surface", 123.45));
 
-    const auto result = m_database->find(Ligarium::Table::Property, id);
+    const auto result = m_database->find(ligarium::Table::Property, id);
 
     QVERIFY(result.has_value());
 
@@ -273,41 +273,41 @@ private slots:
 
   void save_invalid_column()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
-    QVERIFY(!m_database->save(Ligarium::Table::Property, id, "does_not_exist", "value"));
+    QVERIFY(!m_database->save(ligarium::Table::Property, id, "does_not_exist", "value"));
   }
 
   void save_missing_record()
   {
-    QVERIFY(!m_database->save(Ligarium::Table::Property, 999999, "name", "value"));
+    QVERIFY(!m_database->save(ligarium::Table::Property, 999999, "name", "value"));
   }
 
   void remove()
   {
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
-    QVERIFY(m_database->contains(Ligarium::Table::Property, id));
+    QVERIFY(m_database->contains(ligarium::Table::Property, id));
 
-    QVERIFY(m_database->remove(Ligarium::Table::Property, id));
+    QVERIFY(m_database->remove(ligarium::Table::Property, id));
 
-    QVERIFY(!m_database->contains(Ligarium::Table::Property, id));
+    QVERIFY(!m_database->contains(ligarium::Table::Property, id));
   }
 
   void remove_missing_record()
   {
-    QVERIFY(!m_database->remove(Ligarium::Table::Property, 999999));
+    QVERIFY(!m_database->remove(ligarium::Table::Property, 999999));
   }
 
   void signal_db_updated()
   {
-    QSignalSpy spy(m_database, &Ligarium::Database::signal_db_updated);
+    QSignalSpy spy(m_database, &ligarium::Database::signal_db_updated);
 
     QVERIFY(spy.isValid());
 
     // This test currently documents the API.
     // Database::insert/save/remove do not emit the signal yet.
-    const auto id = m_database->insert(Ligarium::Table::Property);
+    const auto id = m_database->insert(ligarium::Table::Property);
 
     QVERIFY(id > 0);
 

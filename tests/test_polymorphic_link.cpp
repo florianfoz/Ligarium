@@ -1,11 +1,6 @@
 #include "ligarium_config.h"
 //
 
-#include "ligarium/database.h"
-#include "ligarium/field.h"
-#include "ligarium/polymorphic_link.h"
-#include "ligarium/record.h"
-#include "ligarium/schema.h"
 #include "test_records.h"
 
 #include <QSqlDatabase>
@@ -13,6 +8,11 @@
 #include <QSqlQuery>
 #include <QtTest>
 #include <cstdint>
+#include <ligarium/database.h>
+#include <ligarium/field.h>
+#include <ligarium/polymorphic_link.h>
+#include <ligarium/record.h>
+#include <ligarium/schema.h>
 #include <memory>
 
 
@@ -22,26 +22,26 @@ class TestPolymorphicLink : public QObject
 
 private:
   QSqlDatabase                        m_sql_database;
-  std::unique_ptr<Ligarium::Database> m_database;
+  std::unique_ptr<ligarium::Database> m_database;
 
 private slots:
   void initTestCase()
   {
-    const QString connection_name = QStringLiteral("ligarium_polymorphic_link_test");
+    const QString connection_name = "ligarium_polymorphic_link_test";
 
-    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(":memory:");
 
     QVERIFY(connection.open());
 
-    Ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_database = std::make_unique<Ligarium::Database>(connection);
+    m_database = std::make_unique<ligarium::Database>(connection);
   }
 
   void cleanupTestCase()
@@ -58,7 +58,7 @@ private slots:
 
   void defaultState()
   {
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
 
     QVERIFY(link.empty());
     QCOMPARE(link.size(), qsizetype(0));
@@ -67,7 +67,7 @@ private slots:
 
   void ids()
   {
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
 
     link.ids = {1, 2, 3};
 
@@ -78,7 +78,7 @@ private slots:
 
   void clear()
   {
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
 
     link.ids = {1, 2};
 
@@ -92,7 +92,7 @@ private slots:
 
   void getEmpty()
   {
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
 
     const QList<Property> records = link.get(*m_database);
 
@@ -104,15 +104,15 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) VALUES "
-                                       "('House'), "
-                                       "('Apartment'), "
-                                       "('Office')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
+                        "('House'), "
+                        "('Apartment'), "
+                        "('Office')"),
              qPrintable(query.lastError().text()));
 
     const QList<qsizetype> ids = {1, 2, 3};
 
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
     link.ids = ids;
 
     const QList<Property> properties = link.get(*m_database);
@@ -120,25 +120,25 @@ private slots:
     QCOMPARE(properties.size(), qsizetype(3));
 
     QCOMPARE(properties.at(0).id(), qsizetype(1));
-    QCOMPARE(properties.at(0).name, QStringLiteral("House"));
+    QCOMPARE(properties.at(0).name, "House");
 
     QCOMPARE(properties.at(1).id(), qsizetype(2));
-    QCOMPARE(properties.at(1).name, QStringLiteral("Apartment"));
+    QCOMPARE(properties.at(1).name, "Apartment");
 
     QCOMPARE(properties.at(2).id(), qsizetype(3));
-    QCOMPARE(properties.at(2).name, QStringLiteral("Office"));
+    QCOMPARE(properties.at(2).name, "Office");
   }
 
   void getTenants()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO tenant (name) VALUES "
-                                       "('Alice'), "
-                                       "('Bob')")),
+    QVERIFY2(query.exec("INSERT INTO tenant (name) VALUES "
+                        "('Alice'), "
+                        "('Bob')"),
              qPrintable(query.lastError().text()));
 
-    Ligarium::PolymorphicLink<Tenant> link;
+    ligarium::PolymorphicLink<Tenant> link;
 
     link.ids = {1, 2};
 
@@ -147,23 +147,23 @@ private slots:
     QCOMPARE(tenants.size(), qsizetype(2));
 
     QCOMPARE(tenants.at(0).id(), qsizetype(1));
-    QCOMPARE(tenants.at(0).name, QStringLiteral("Alice"));
+    QCOMPARE(tenants.at(0).name, "Alice");
 
     QCOMPARE(tenants.at(1).id(), qsizetype(2));
-    QCOMPARE(tenants.at(1).name, QStringLiteral("Bob"));
+    QCOMPARE(tenants.at(1).name, "Bob");
   }
 
   void preservesIdOrder()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) VALUES "
-                                       "('House'), "
-                                       "('Apartment'), "
-                                       "('Office')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
+                        "('House'), "
+                        "('Apartment'), "
+                        "('Office')"),
              qPrintable(query.lastError().text()));
 
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
 
     link.ids = {3, 1, 2};
 
@@ -172,33 +172,33 @@ private slots:
     QCOMPARE(properties.size(), qsizetype(3));
 
     QCOMPARE(properties.at(0).id(), qsizetype(3));
-    QCOMPARE(properties.at(0).name, QStringLiteral("Office"));
+    QCOMPARE(properties.at(0).name, "Office");
 
     QCOMPARE(properties.at(1).id(), qsizetype(1));
-    QCOMPARE(properties.at(1).name, QStringLiteral("House"));
+    QCOMPARE(properties.at(1).name, "House");
 
     QCOMPARE(properties.at(2).id(), qsizetype(2));
-    QCOMPARE(properties.at(2).name, QStringLiteral("Apartment"));
+    QCOMPARE(properties.at(2).name, "Apartment");
   }
 
   void polymorphicTarget()
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO property (name) "
-                                       "VALUES ('House')")),
+    QVERIFY2(query.exec("INSERT INTO property (name) "
+                        "VALUES ('House')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype property_id = query.lastInsertId().toLongLong();
 
-    Ligarium::PolymorphicLink<Property> link;
+    ligarium::PolymorphicLink<Property> link;
     link.ids = {property_id};
 
     const QList<Property> properties = link.get(*m_database);
 
     QCOMPARE(properties.size(), qsizetype(1));
     QCOMPARE(properties.first().id(), property_id);
-    QCOMPARE(properties.first().name, QStringLiteral("House"));
+    QCOMPARE(properties.first().name, "House");
   }
 };
 

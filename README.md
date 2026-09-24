@@ -11,11 +11,11 @@ Ligarium provides a lightweight ORM layer for C++/Qt applications without introd
 The application defines its own persistent types:
 
 ```cpp
-class Property : public Ligarium::Record<Property>
+class Property : public ligarium::Record<Property>
 {
 public:
-    static constexpr Ligarium::Table static_table =
-        Ligarium::Table::Property;
+    static constexpr auto static_table =
+        ligarium::Table::Property;
 
     QString name;
     double surface = 0.0;
@@ -23,8 +23,8 @@ public:
     static constexpr auto sql_fields()
     {
         return std::tuple{
-            Ligarium::field(u"name", &Property::name),
-            Ligarium::field(u"surface", &Property::surface),
+            ligarium::field(u"name", &Property::name),
+            ligarium::field(u"surface", &Property::surface),
         };
     }
 };
@@ -35,7 +35,7 @@ Ligarium uses this compile-time metadata to connect the C++ model to an SQL data
 ```text
 Application
     │
-    ├── Ligarium::Table
+    ├── ligarium::Table
     ├── Record types
     ├── Fields
     └── Relationships
@@ -77,7 +77,7 @@ Application
 | [Fields](docs/fields.md)                         | Mapping C++ members to SQL columns            |
 | [Relationships](docs/relationships.md)           | Typed relationships between records           |
 | [Polymorphic relationships](docs/polymorphic.md) | Relationships targeting multiple record types |
-| [Database](docs/database.md)                     | `Ligarium::Database` and Qt SQL               |
+| [Database](docs/database.md)                     | `ligarium::Database` and Qt SQL               |
 | [Registries](docs/registries.md)                 | Record and GUI registries                     |
 | [Testing](docs/testing.md)                       | Test architecture and QtTest                  |
 | [CMake](docs/cmake.md)                           | Building and integrating Ligarium             |
@@ -112,35 +112,43 @@ See [INSTALLATION.md](/INSTALLATION.md)
 
 > Please note that the project is currently under development, **and not all tests are passing yet**.
 
-> this project use https://github.com/florianfoz/enumlite for enum reflexion
-
 Define your configuraition, by create `ligarium_config.h`:
 
 ```cpp
 #ifndef LIGARIUM_CONFIG_H
 #define LIGARIUM_CONFIG_H
 
-#include <enumlite/enumlite_backend_qt.h>
-#define ENUMLITE_DEFAULT_BACKEND enumlite::qt_backend
-#include <enumlite/enumlite.h>
+#include <QString>
 
-namespace Ligarium
+namespace ligarium
 {
 
-DEFINE_ENUM(Table, int,   // user defined table
-            Property, 1,  //
-            Tenant, 2,    //
-            Attachment, 3 //
-)
+// user defined table
+enum class Table : uint8_t {
+  Property,
+  Tenant,
+  Attachment,
+};
 
-} // namespace Ligarium
+// user defined table_to_str
+[[nodiscard]]
+inline QString Table_to_str(Table table)
+{
+  switch (table) {
+  case Table::Property:   return "Property";
+  case Table::Tenant:     return "Tenant";
+  case Table::Attachment: return "Attachment";
+  }
+}
 
+} // namespace ligarium
 
-#include <ligarium.h>
+// must be included before user ligarium_config.h file
+#include <ligarium/ligarium.h>
 
 #endif // LIGARIUM_CONFIG_H
+
 ```
-It is define the table to use and set `enumlite` with the `qt_backend` to be fully in the qt toolchain
 
 **Include `ligarium_config.h` always before any ligarium file!**
 
@@ -148,12 +156,12 @@ Define a record:
 
 ```cpp
 
-class Property final : public Ligarium::Record<Property>
+class Property final : public ligarium::Record<Property>
 {
 public:
-  using Ligarium::Record<Property>::Record;
+  using ligarium::Record<Property>::Record;
 
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
+  static constexpr auto static_table = ligarium::Table::Property;
 
   QString name;
 
@@ -166,7 +174,7 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"name", &Property::name) //
+        ligarium::field(u"name", &Property::name) //
     };
   }
 
@@ -180,21 +188,21 @@ public:
 Open a Qt SQL connection and use the record API:
 
 ```cpp
-const QString connection_name = "test_all_database_records";
+const QString connection_name = "my_name";
 
 QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-connection.setDatabaseName(QStringLiteral(":memory:"));
+connection.setDatabaseName(":memory:");
 
 QVERIFY(connection.open());
 
-Ligarium::SchemaBuilder schema(connection);
+ligarium::SchemaBuilder schema(connection);
 
 if (!schema.create_all<Property, Tenant, Attachment>()) {
   qPrintable(schema.last_error());
 }
 
-Ligarium::Database db(connection);
+ligarium::Database db(connection);
 
 Property property = Property::create_record(db);
 property.name = "My property";

@@ -57,7 +57,7 @@ For example:
 link_ManyToMany(
     u"tenants",
     &Property::tenants,
-    Ligarium::Table::PropertyTenant,
+    ligarium::Table::PropertyTenant,
     u"property_id",
     u"tenant_id"
 );
@@ -89,7 +89,7 @@ can become:
 
 ```cpp
 class Landlord_Property
-    : public Ligarium::Record<Landlord_Property>
+    : public ligarium::Record<Landlord_Property>
 {
     // ...
 };
