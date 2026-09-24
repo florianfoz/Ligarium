@@ -3,29 +3,10 @@
 #include "field.h"
 #include "record.h"
 #include "record_registry.h"
+#include "test_records.h"
 
 #include <QTest>
 
-class Property : public Ligarium::Record<Property>
-{
-public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
-
-  [[nodiscard]]
-  QString dump() const override
-  {
-    return QStringLiteral("Property(id=%1)").arg(id());
-  }
-
-  QString name;
-
-  static constexpr auto sql_fields()
-  {
-    return std::tuple{
-        Ligarium::field(u"name", &Property::name),
-    };
-  }
-};
 
 class TestRecordRegistry : public QObject
 {

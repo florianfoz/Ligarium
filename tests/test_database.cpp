@@ -2,6 +2,8 @@
 
 //
 #include "database.h"
+#include "schema.h"
+#include "test_records.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -27,27 +29,17 @@ private slots:
   {
     QVERIFY2(QSqlDatabase::isDriverAvailable("QSQLITE"), "QSQLITE driver is not available");
 
-    m_connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
+    m_connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
 
-    m_connection.setDatabaseName(":memory:");
+    m_connection.setDatabaseName(QStringLiteral(":memory:"));
 
-    QVERIFY2(m_connection.open(), qPrintable(m_connection.lastError().text()));
+    QVERIFY(m_connection.open());
 
-    QSqlQuery query(m_connection);
+    Ligarium::SchemaBuilder schema(m_connection);
 
-    QVERIFY2(query.exec("CREATE TABLE property ("
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        "name TEXT NOT NULL,"
-                        "surface REAL,"
-                        "active INTEGER NOT NULL DEFAULT 1"
-                        ")"),
-             qPrintable(query.lastError().text()));
-
-    QVERIFY2(query.exec("CREATE TABLE tenant ("
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                        "name TEXT NOT NULL"
-                        ")"),
-             qPrintable(query.lastError().text()));
+    if (!schema.create_all<Property, Tenant, Attachment>()) {
+      QVERIFY(qPrintable(schema.last_error()));
+    }
 
     m_database = new Ligarium::Database(m_connection);
   }

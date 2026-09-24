@@ -1,36 +1,27 @@
 #ifndef LIGARIUM_H
 #define LIGARIUM_H
 
-#include <enumlite/enumlite_backend_qt.h>
-#define ENUMLITE_DEFAULT_BACKEND enumlite::qt_backend
-#include <enumlite/enumlite.h>
-//
 #include <QSqlDatabase>
-
-// #ifndef LIGARIUM_TABLE_TYPE
-// #error LIGARIUM_TABLE_TYPE macro must be defined to use Ligarium!
-// #define LIGARIUM_TABLE_TYPE enum class _T_ : uint8_t {};
-// #endif
 
 
 namespace Ligarium
 {
 
-enum class Table;
+enum class Table : uint8_t; // user must define
+
+QString Table_to_str(Table table); // user must define
 
 class Database;
 
 constexpr qsizetype INVALID_ID = -1;
 
-QString Table_to_str(Table table);
-
-DEFINE_ENUM(ERelation, uint8_t,     //
-            OneToOne, 1,            //
-            OneToMany, 2,           //
-            ManyToOne, 3,           //
-            ManyToMany, 4,          //
-            PolymorphicOneToMany, 5 //
-)
+enum class ERelation : uint8_t {
+  OneToOne,
+  OneToMany,
+  ManyToOne,
+  ManyToMany,
+  PolymorphicOneToMany,
+};
 
 template <class T>
 class Record;
