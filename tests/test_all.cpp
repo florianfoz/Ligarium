@@ -1,14 +1,14 @@
 
 #include "ligarium_config.h"
 //
-#include "database.h"
-#include "field.h"
-#include "link.h"
-#include "polymorphic_link.h"
-#include "record.h"
-#include "record_registry.h"
-#include "schema.h"
-#include "widget_registry.h"
+#include "ligarium/database.h"
+#include "ligarium/field.h"
+#include "ligarium/link.h"
+#include "ligarium/polymorphic_link.h"
+#include "ligarium/record.h"
+#include "ligarium/record_registry.h"
+#include "ligarium/schema.h"
+#include "ligarium/widget_registry.h"
 
 #include <QApplication>
 #include <QSqlDatabase>

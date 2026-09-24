@@ -26,6 +26,6 @@ QString Table_to_str(Table table)
 } // namespace Ligarium
 
 // must be included always before user ligarium_config.h file
-#include <ligarium.h>
+#include <ligarium/ligarium.h>
 
 #endif // LIGARIUM_CONFIG_H

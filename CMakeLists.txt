@@ -33,15 +33,15 @@ file(GLOB_RECURSE LIGARIUM_SOURCES
 
 file(GLOB_RECURSE LIGARIUM_HEADERS
     CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/field.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/schema.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/database.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/link.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/polymorphic_link.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/record.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/record_registry.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/widget_registry.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/field.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/schema.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/ligarium.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/database.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/link.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/polymorphic_link.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/record.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/record_registry.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/widget_registry.h"
 )
 
 # ---------------------------------------------------------------------------

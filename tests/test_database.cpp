@@ -1,8 +1,8 @@
 #include "ligarium_config.h"
 
 //
-#include "database.h"
-#include "schema.h"
+#include "ligarium/database.h"
+#include "ligarium/schema.h"
 #include "test_records.h"
 
 #include <QSqlDatabase>
