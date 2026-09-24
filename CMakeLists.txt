@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 
 project(
-    Ligarium
+    ligarium
     VERSION 0.1.0
     DESCRIPTION "A C++/Qt 6 ORM for mapping records and relationships to SQL databases"
     LANGUAGES CXX
@@ -49,11 +49,11 @@ file(GLOB_RECURSE LIGARIUM_HEADERS
 # ---------------------------------------------------------------------------
 
 
-add_library(Ligarium ${LIGARIUM_SOURCES})
+add_library(ligarium ${LIGARIUM_SOURCES})
 
-add_library(Ligarium::Ligarium ALIAS Ligarium)
+add_library(ligarium::ligarium ALIAS ligarium)
 
-target_sources(Ligarium
+target_sources(ligarium
     PRIVATE
         ${LIGARIUM_SOURCES}
     PUBLIC
@@ -64,28 +64,28 @@ target_sources(Ligarium
             ${LIGARIUM_HEADERS}
 )
 
-target_include_directories(Ligarium
+target_include_directories(ligarium
     PUBLIC
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
 )
 
-target_link_libraries(Ligarium
+target_link_libraries(ligarium
     PUBLIC
         Qt6::Core
         Qt6::Sql
         Qt6::Widgets
 )
 
-target_compile_features(Ligarium
+target_compile_features(ligarium
     PUBLIC
         cxx_std_20
 )
 
-set_target_properties(Ligarium PROPERTIES
+set_target_properties(ligarium PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
-    EXPORT_NAME Ligarium
+    EXPORT_NAME ligarium
 )
 
 
@@ -95,8 +95,8 @@ set_target_properties(Ligarium PROPERTIES
 # ---------------------------------------------------------------------------
 
 install(
-    TARGETS Ligarium
-    EXPORT LigariumTargets
+    TARGETS ligarium
+    EXPORT ligariumTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
@@ -116,37 +116,37 @@ install(
 # ---------------------------------------------------------------------------
 
 install(
-    EXPORT LigariumTargets
-    FILE LigariumTargets.cmake
-    NAMESPACE Ligarium::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/Ligarium
+    EXPORT ligariumTargets
+    FILE ligariumTargets.cmake
+    NAMESPACE ligarium::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/ligarium
 )
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/LigariumConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfig.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ligariumConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfig.cmake"
     INSTALL_DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/Ligarium
+        ${CMAKE_INSTALL_LIBDIR}/cmake/ligarium
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfigVersion.cmake"
     DESTINATION
-        ${CMAKE_INSTALL_LIBDIR}/cmake/Ligarium
+        ${CMAKE_INSTALL_LIBDIR}/cmake/ligarium
 )
 
 
 
 option(LIGARIUM_BUILD_TESTS
-    "Build Ligarium tests"
+    "Build ligarium tests"
     OFF
 )
 
@@ -156,7 +156,7 @@ if(LIGARIUM_BUILD_TESTS)
     add_subdirectory(tests)
 
 
-    target_compile_options(Ligarium
+    target_compile_options(ligarium
     PRIVATE
         $<$<CXX_COMPILER_ID:GNU,Clang>:-include${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
         $<$<CXX_COMPILER_ID:MSVC>:/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
