@@ -1,8 +1,8 @@
 #include "ligarium_config.h"
 //
-#include "field.h"
-#include "record.h"
-#include "record_registry.h"
+#include "ligarium/field.h"
+#include "ligarium/record.h"
+#include "ligarium/record_registry.h"
 #include "test_records.h"
 
 #include <QTest>

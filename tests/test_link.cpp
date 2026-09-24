@@ -1,7 +1,7 @@
 #include "ligarium_config.h"
 //
 
-#include "link.h"
+#include "ligarium/link.h"
 
 #include <QtTest/QtTest>
 

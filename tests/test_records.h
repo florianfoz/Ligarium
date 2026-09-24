@@ -3,8 +3,8 @@
 
 #include "ligarium_config.h"
 //
-#include "field.h"
-#include "record.h"
+#include "ligarium/field.h"
+#include "ligarium/record.h"
 
 #define DEFINE_FIELD(_type, _name) _type _name;
 

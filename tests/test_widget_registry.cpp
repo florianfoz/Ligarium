@@ -1,7 +1,7 @@
 #include "ligarium_config.h"
 //
 
-#include "widget_registry.h"
+#include "ligarium/widget_registry.h"
 
 #include <QTest>
 #include <QWidget>
