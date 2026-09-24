@@ -46,7 +46,7 @@ src/
 Defines the global Ligarium configuration and exposes the application-defined table type as:
 
 ```cpp
-Ligarium::Table
+ligarium::Table
 ```
 
 ### `Database`

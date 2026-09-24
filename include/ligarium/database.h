@@ -8,7 +8,7 @@
 #include <QVariant>
 #include <optional>
 
-namespace Ligarium
+namespace ligarium
 {
 
 class Database final : public QObject
@@ -68,6 +68,6 @@ signals:
   void signal_db_updated(Table table);
 };
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // LIGARIUM_DATABASE_H

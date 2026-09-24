@@ -20,8 +20,8 @@ A complete definition:
 static constexpr auto sql_fields()
 {
     return std::tuple{
-        Ligarium::field(u"name", &Property::name),
-        Ligarium::field(u"surface", &Property::surface),
+        ligarium::field(u"name", &Property::name),
+        ligarium::field(u"surface", &Property::surface),
     };
 }
 ```

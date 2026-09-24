@@ -8,7 +8,7 @@
 #include <functional>
 #include <utility>
 
-namespace Ligarium
+namespace ligarium
 {
 
 class RecordRegistry
@@ -65,6 +65,6 @@ void register_record(RecordRegistry& registry, Table table)
       table, [&registry](qsizetype id) -> QString { return TRecord::read_record(*registry.database(), id).dump(); });
 }
 
-} // namespace Ligarium
+} // namespace ligarium
 
 #endif // RECORD_REGISTRY_H

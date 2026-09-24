@@ -3,48 +3,16 @@
 
 #include "ligarium_config.h"
 //
-#include "ligarium/field.h"
-#include "ligarium/record.h"
-
-#define DEFINE_FIELD(_type, _name) _type _name;
+#include <ligarium/field.h>
+#include <ligarium/record.h>
 
 
-#define DEFINE_RECORD(_name, _fields, _dump, _other)                                                                   \
-  class _name final : public Ligarium::Record<_name>                                                                   \
-  {                                                                                                                    \
-  public:                                                                                                              \
-    using Ligarium::Record<_name>::Record;                                                                             \
-                                                                                                                       \
-    static constexpr Ligarium::Table static_table = Ligarium::Table::_name;                                            \
-                                                                                                                       \
-    QString name;                                                                                                      \
-                                                                                                                       \
-    [[nodiscard]]                                                                                                      \
-    QString dump() const override                                                                                      \
-    {                                                                                                                  \
-      return _dump;                                                                                                    \
-    }                                                                                                                  \
-                                                                                                                       \
-    static constexpr auto sql_fields()                                                                                 \
-    {                                                                                                                  \
-      return std::tuple{                                                                                               \
-          Ligarium::field(u"name", &_name::name) /**/                                                                  \
-      };                                                                                                               \
-    }                                                                                                                  \
-                                                                                                                       \
-    friend bool operator==(const _name& lhs, const _name& rhs)                                                         \
-    {                                                                                                                  \
-      return lhs.id() == rhs.id();                                                                                     \
-    }                                                                                                                  \
-  };
-
-
-class Property final : public Ligarium::Record<Property>
+class Property final : public ligarium::Record<Property>
 {
 public:
-  using Ligarium::Record<Property>::Record;
+  using ligarium::Record<Property>::Record;
 
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
+  static constexpr auto static_table = ligarium::Table::Property;
 
   QString name;
 
@@ -57,7 +25,7 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"name", &Property::name) //
+        ligarium::field(u"name", &Property::name) //
     };
   }
 
@@ -68,12 +36,12 @@ public:
 };
 
 
-class Tenant final : public Ligarium::Record<Tenant>
+class Tenant final : public ligarium::Record<Tenant>
 {
 public:
-  using Ligarium::Record<Tenant>::Record;
+  using ligarium::Record<Tenant>::Record;
 
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Tenant;
+  static constexpr auto static_table = ligarium::Table::Tenant;
 
   QString name;
 
@@ -86,7 +54,7 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"name", &Tenant::name) //
+        ligarium::field(u"name", &Tenant::name) //
     };
   }
 
@@ -97,16 +65,16 @@ public:
 };
 
 
-class Attachment final : public Ligarium::Record<Attachment>
+class Attachment final : public ligarium::Record<Attachment>
 {
 public:
-  using Ligarium::Record<Attachment>::Record;
+  using ligarium::Record<Attachment>::Record;
 
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Attachment;
+  static constexpr auto static_table = ligarium::Table::Attachment;
 
-  Ligarium::Table table = Ligarium::Table::Property;
+  ligarium::Table table = ligarium::Table::Property;
 
-  qsizetype col_id = Ligarium::INVALID_ID;
+  qsizetype col_id = ligarium::INVALID_ID;
   QString   path;
 
   [[nodiscard]]
@@ -118,9 +86,9 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"table", &Attachment::table),   //
-        Ligarium::field(u"col_id", &Attachment::col_id), //
-        Ligarium::field(u"path", &Attachment::path)      //
+        ligarium::field(u"table", &Attachment::table),   //
+        ligarium::field(u"col_id", &Attachment::col_id), //
+        ligarium::field(u"path", &Attachment::path)      //
     };
   }
 

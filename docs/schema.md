@@ -28,7 +28,7 @@ if (!connection.open()) {
 Create a schema builder:
 
 ```cpp
-Ligarium::SchemaBuilder schema(connection);
+ligarium::SchemaBuilder schema(connection);
 ```
 
 Then create the tables for the application's records:
@@ -57,15 +57,15 @@ A record exposes its database metadata through `T::sql_fields()`.
 For example:
 
 ```cpp
-class Property : public Ligarium::Record<Property>
+class Property : public ligarium::Record<Property>
 {
 public:
-    static constexpr Ligarium::Table static_table =
+    static constexpr auto static_table =
         ApplicationTable::Property;
 
     QString name;
 
-    Property(Ligarium::Database* db = nullptr)
+    Property(ligarium::Database* db = nullptr)
         : Record(db)
     {
     }
@@ -73,7 +73,7 @@ public:
     static constexpr auto sql_fields()
     {
         return std::tuple{
-            Ligarium::field(
+            ligarium::field(
                 u"name",
                 &Property::name),
         };
@@ -85,7 +85,7 @@ The return type of `sql_fields()` is a `std::tuple` containing Ligarium field me
 
 ```cpp
 std::tuple<
-    Ligarium::SqlField<Property, QString>
+    ligarium::SqlField<Property, QString>
 >
 ```
 
@@ -109,9 +109,9 @@ For example:
 static constexpr auto sql_fields()
 {
     return std::tuple{
-        Ligarium::field(u"name", &Property::name),
-        Ligarium::field(u"area", &Property::area),
-        Ligarium::field(u"active", &Property::active),
+        ligarium::field(u"name", &Property::name),
+        ligarium::field(u"area", &Property::area),
+        ligarium::field(u"active", &Property::active),
     };
 }
 ```
@@ -157,7 +157,7 @@ These can be introduced later if the field metadata is extended to describe them
 For example:
 
 ```cpp
-Ligarium::link_ManyToOne(
+ligarium::link_ManyToOne(
     u"tenant_id",
     &Property::tenant)
 ```
@@ -181,7 +181,7 @@ A `OneToMany` relationship stores the foreign key in the target table.
 For example:
 
 ```cpp
-Ligarium::link_OneToMany(
+ligarium::link_OneToMany(
     u"properties",
     &Tenant::properties,
     ApplicationTable::Property,
@@ -217,7 +217,7 @@ A `ManyToMany` relationship is stored in an association table.
 For example:
 
 ```cpp
-Ligarium::link_ManyToMany(
+ligarium::link_ManyToMany(
     u"attachments",
     &Property::attachments,
     ApplicationTable::PropertyAttachment,
@@ -252,7 +252,7 @@ A polymorphic `OneToMany` relationship associates a target record with a record 
 For example:
 
 ```cpp
-Ligarium::link_PolymorphicOneToMany(
+ligarium::link_PolymorphicOneToMany(
     u"attachments",
     &Property::attachments,
     ApplicationTable::Attachment)
@@ -305,7 +305,7 @@ The polymorphic relationship only needs to identify the owner's table.
 The value stored in `owner_table` is the string returned by:
 
 ```cpp
-Ligarium::Table_to_str(table)
+ligarium::Table_to_str(table)
 ```
 
 For example:
@@ -393,7 +393,7 @@ connection.setDatabaseName(":memory:");
 
 QVERIFY(connection.open());
 
-Ligarium::SchemaBuilder schema(connection);
+ligarium::SchemaBuilder schema(connection);
 
 QVERIFY(
     schema.create_all<

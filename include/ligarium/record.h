@@ -19,7 +19,7 @@ namespace
  * OneToMany and ManyToMany links do not belong to the main query and are
  * therefore ignored here.
  */
-template <Ligarium::RecordType RECORD>
+template <ligarium::RecordType RECORD>
 void read_record_fields(RECORD& record, const QSqlQuery& query)
 {
   std::apply(
@@ -42,7 +42,7 @@ void read_record_fields(RECORD& record, const QSqlQuery& query)
  * OneToMany and ManyToMany relationships are stored outside the current
  * record table and therefore require separate SQL queries.
  */
-template <Ligarium::RecordType RECORD>
+template <ligarium::RecordType RECORD>
 void read_record_links(RECORD& record)
 {
   std::apply(
@@ -58,8 +58,8 @@ void read_record_links(RECORD& record)
                 using FIELD = std::remove_cvref_t<decltype(fields)>;
 
                 if constexpr (requires { FIELD::relation; }) {
-                  if constexpr (FIELD::relation == Ligarium::ERelation::OneToMany
-                                || FIELD::relation == Ligarium::ERelation::ManyToMany) {
+                  if constexpr (FIELD::relation == ligarium::ERelation::OneToMany
+                                || FIELD::relation == ligarium::ERelation::ManyToMany) {
                     const QList<qsizetype> ids = read_link_ids(FIELD::relation, fields.spec, record.id);
 
                     (record.*(fields.member)).ids = ids;
@@ -73,7 +73,7 @@ void read_record_links(RECORD& record)
 }
 } // namespace
 
-namespace Ligarium
+namespace ligarium
 {
 [[nodiscard]]
 inline qsizetype create_record(Database& db, Table table)
@@ -195,11 +195,11 @@ template <RecordType T>
 [[nodiscard]]
 bool is_dirty(const Database& db, const T& _this, qsizetype other_id = INVALID_ID)
 {
-  if (other_id != INVALID_ID) return _this != Ligarium::read_record<T>(const_cast<Database&>(db), other_id);
+  if (other_id != INVALID_ID) return _this != ligarium::read_record<T>(const_cast<Database&>(db), other_id);
 
   if (_this.id() == INVALID_ID) return true;
 
-  return _this != Ligarium::read_record<T>(const_cast<Database&>(db), _this.id());
+  return _this != ligarium::read_record<T>(const_cast<Database&>(db), _this.id());
 }
 
 template <class DERIVED>
@@ -249,34 +249,34 @@ public:
   [[nodiscard]]
   static DERIVED create_record(Database& db)
   {
-    auto id = Ligarium::create_record(db, DERIVED::static_table);
-    return Ligarium::read_record<DERIVED>(db, id);
+    auto id = ligarium::create_record(db, DERIVED::static_table);
+    return ligarium::read_record<DERIVED>(db, id);
   }
 
   [[nodiscard]]
   static DERIVED read_record(Database& db, qsizetype id)
   {
     if (id == INVALID_ID) return DERIVED();
-    return Ligarium::read_record<DERIVED>(db, id);
+    return ligarium::read_record<DERIVED>(db, id);
   }
 
   [[nodiscard]]
   static QList<DERIVED> all_records(const Database& db)
   {
-    return Ligarium::all_records<DERIVED>(db);
+    return ligarium::all_records<DERIVED>(db);
   }
 
   [[nodiscard]]
   static QList<qsizetype> all_records_id(const Database& db)
   {
-    return Ligarium::all_records_id(db, DERIVED::static_table);
+    return ligarium::all_records_id(db, DERIVED::static_table);
   }
 
   [[nodiscard]]
   bool delete_record(bool wmsg = false, const QString& msg = {})
   {
     if (m_db == nullptr) return false;
-    if (Ligarium::delete_record(*m_db, DERIVED::static_table, m_id, wmsg, msg)) m_id = INVALID_ID;
+    if (ligarium::delete_record(*m_db, DERIVED::static_table, m_id, wmsg, msg)) m_id = INVALID_ID;
     return m_id == INVALID_ID;
   }
 
@@ -284,8 +284,8 @@ public:
   bool save_record()
   {
     if (m_db == nullptr) return false;
-    if (m_id == INVALID_ID) m_id = Ligarium::create_record(*m_db, DERIVED::static_table);
-    return Ligarium::save_record<DERIVED>(static_cast<DERIVED*>(this));
+    if (m_id == INVALID_ID) m_id = ligarium::create_record(*m_db, DERIVED::static_table);
+    return ligarium::save_record<DERIVED>(static_cast<DERIVED*>(this));
   }
 
   [[nodiscard]] bool is_newer(qsizetype other_id = INVALID_ID) const
@@ -298,7 +298,7 @@ public:
   [[nodiscard]] bool is_dirty(qsizetype other_id = INVALID_ID) const
   {
     if (m_db == nullptr) return false;
-    return Ligarium::is_dirty<DERIVED>(*m_db, *static_cast<const DERIVED*>(this), other_id);
+    return ligarium::is_dirty<DERIVED>(*m_db, *static_cast<const DERIVED*>(this), other_id);
   }
 
   [[nodiscard]] virtual QString dump() const
@@ -311,7 +311,7 @@ public:
   bool is_valid() const
   {
     if (m_db == nullptr) return false;
-    return Ligarium::contains_record(*m_db, DERIVED::static_table, m_id);
+    return ligarium::contains_record(*m_db, DERIVED::static_table, m_id);
   }
 
   explicit operator bool() const noexcept
@@ -325,7 +325,7 @@ private:
   Database* m_db = nullptr;
 };
 
-} // namespace Ligarium
+} // namespace ligarium
 
 
 #endif // RECORD_H

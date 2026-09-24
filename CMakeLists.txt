@@ -151,19 +151,17 @@ option(LIGARIUM_BUILD_TESTS
 )
 
 if(LIGARIUM_BUILD_TESTS)
-    find_package(Qt6 REQUIRED COMPONENTS Test)
-
-    add_subdirectory(tests)
-
-
-    target_compile_options(ligarium
-    PRIVATE
-        $<$<CXX_COMPILER_ID:GNU,Clang>:-include${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
-        $<$<CXX_COMPILER_ID:MSVC>:/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
-    )
-
 
     enable_testing()
 
+    find_package(Qt6 REQUIRED COMPONENTS Test)
+
+    target_compile_options(ligarium
+        PRIVATE
+            $<$<CXX_COMPILER_ID:GNU,Clang>:-include${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
+            $<$<CXX_COMPILER_ID:MSVC>:/FI${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
+    )
+
+    add_subdirectory(tests)
 
 endif()

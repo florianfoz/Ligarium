@@ -1,34 +1,33 @@
 
 #include "ligarium_config.h"
 //
-#include "ligarium/database.h"
-#include "ligarium/field.h"
-#include "ligarium/link.h"
-#include "ligarium/polymorphic_link.h"
-#include "ligarium/record.h"
-#include "ligarium/record_registry.h"
-#include "ligarium/schema.h"
-#include "ligarium/widget_registry.h"
-
 #include <QApplication>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QTest>
 #include <QWidget>
+#include <ligarium/database.h>
+#include <ligarium/field.h>
+#include <ligarium/link.h>
+#include <ligarium/polymorphic_link.h>
+#include <ligarium/record.h>
+#include <ligarium/record_registry.h>
+#include <ligarium/schema.h>
+#include <ligarium/widget_registry.h>
 #include <memory>
 
 namespace
 {
 
-class Property : public Ligarium::Record<Property>
+class Property : public ligarium::Record<Property>
 {
 public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
+  static constexpr auto static_table = ligarium::Table::Property;
 
   QString name;
   double  surface = 0.0;
 
-  Property(Ligarium::Database* db = nullptr)
+  Property(ligarium::Database* db = nullptr)
     : Record(db)
   {
   }
@@ -36,8 +35,8 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"name", &Property::name),
-        Ligarium::field(u"surface", &Property::surface),
+        ligarium::field(u"name", &Property::name),
+        ligarium::field(u"surface", &Property::surface),
     };
   }
 
@@ -53,14 +52,14 @@ public:
   }
 };
 
-class Tenant : public Ligarium::Record<Tenant>
+class Tenant : public ligarium::Record<Tenant>
 {
 public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Tenant;
+  static constexpr auto static_table = ligarium::Table::Tenant;
 
   QString name;
 
-  Tenant(Ligarium::Database* db = nullptr)
+  Tenant(ligarium::Database* db = nullptr)
     : Record(db)
   {
   }
@@ -68,7 +67,7 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"name", &Tenant::name),
+        ligarium::field(u"name", &Tenant::name),
     };
   }
 
@@ -84,16 +83,16 @@ public:
   }
 };
 
-class Attachment : public Ligarium::Record<Attachment>
+class Attachment : public ligarium::Record<Attachment>
 {
 public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Attachment;
+  static constexpr auto static_table = ligarium::Table::Attachment;
 
-  Ligarium::Table table{};
-  qsizetype       col_id = Ligarium::INVALID_ID;
+  ligarium::Table table{};
+  qsizetype       col_id = ligarium::INVALID_ID;
   QString         path;
 
-  Attachment(Ligarium::Database* db = nullptr)
+  Attachment(ligarium::Database* db = nullptr)
     : Record(db)
   {
   }
@@ -101,9 +100,9 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        Ligarium::field(u"table", &Attachment::table),
-        Ligarium::field(u"col_id", &Attachment::col_id),
-        Ligarium::field(u"path", &Attachment::path),
+        ligarium::field(u"table", &Attachment::table),
+        ligarium::field(u"col_id", &Attachment::col_id),
+        ligarium::field(u"path", &Attachment::path),
     };
   }
 
@@ -137,14 +136,14 @@ public:
   }
 
 private:
-  qsizetype m_id = Ligarium::INVALID_ID;
+  qsizetype m_id = ligarium::INVALID_ID;
 };
 
 class TestAll : public QObject
 {
   Q_OBJECT
 
-  Ligarium::Database* m_db;
+  ligarium::Database* m_db;
 
 private slots:
   void database_and_records();
@@ -158,73 +157,73 @@ private slots:
 
 void TestAll::database_and_records()
 {
-  const QString connection_name = QStringLiteral("test_all_database_records");
+  const QString connection_name = "test_all_database_records";
 
   {
-    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(":memory:");
 
     QVERIFY(connection.open());
 
-    Ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    Ligarium::Database db(connection);
+    ligarium::Database db(connection);
 
     QVERIFY(db.is_open());
 
     Property property(&db);
-    property.name    = QStringLiteral("House");
+    property.name    = "House";
     property.surface = 120.5;
 
     QVERIFY(property.save_record());
     QVERIFY(property.is_valid());
-    QVERIFY(property.id() != Ligarium::INVALID_ID);
+    QVERIFY(property.id() != ligarium::INVALID_ID);
 
     const qsizetype property_id = property.id();
 
     Property loaded = Property::read_record(db, property_id);
 
     QCOMPARE(loaded.id(), property_id);
-    QCOMPARE(loaded.name, QStringLiteral("House"));
+    QCOMPARE(loaded.name, "House");
     QCOMPARE(loaded.surface, 120.5);
 
-    property.name = QStringLiteral("Updated House");
+    property.name = "Updated House";
 
     QVERIFY(property.save_record());
 
     loaded = Property::read_record(db, property_id);
 
-    QCOMPARE(loaded.name, QStringLiteral("Updated House"));
+    QCOMPARE(loaded.name, "Updated House");
 
     QVERIFY(property.delete_record());
     QVERIFY(!property.is_valid());
 
-    QVERIFY(!Ligarium::contains_record(db, Ligarium::Table::Property, property_id));
+    QVERIFY(!ligarium::contains_record(db, ligarium::Table::Property, property_id));
   }
 
   QSqlDatabase::removeDatabase(connection_name);
 
   {
-    const QString connection_name = QStringLiteral("test_all_database_records");
+    const QString connection_name = "test_all_database_records";
 
-    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(":memory:");
 
     QVERIFY(connection.open());
 
-    Ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_db = new Ligarium::Database(connection);
+    m_db = new ligarium::Database(connection);
 
     QVERIFY(m_db->is_open());
   }
@@ -233,25 +232,25 @@ void TestAll::database_and_records()
 
 void TestAll::fields_and_records()
 {
-  const QString connection_name = QStringLiteral("test_all_fields");
+  const QString connection_name = "test_all_fields";
 
   {
-    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(":memory:");
 
     QVERIFY(connection.open());
 
-    Ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    Ligarium::Database db(connection);
+    ligarium::Database db(connection);
 
     Property property(&db);
-    property.name    = QStringLiteral("Apartment");
+    property.name    = "Apartment";
     property.surface = 85.25;
 
     QVERIFY(property.save_record());
@@ -265,9 +264,9 @@ void TestAll::fields_and_records()
 
     QVERIFY(query.next());
 
-    QCOMPARE(query.value(QStringLiteral("name")).toString(), QStringLiteral("Apartment"));
+    QCOMPARE(query.value("name").toString(), "Apartment");
 
-    QCOMPARE(query.value(QStringLiteral("surface")).toDouble(), 85.25);
+    QCOMPARE(query.value("surface").toDouble(), 85.25);
   }
 
   QSqlDatabase::removeDatabase(connection_name);
@@ -275,7 +274,7 @@ void TestAll::fields_and_records()
 
 void TestAll::links()
 {
-  Ligarium::Link<Tenant, Ligarium::ERelation::ManyToOne> link;
+  ligarium::Link<Tenant, ligarium::ERelation::ManyToOne> link;
 
   QVERIFY(!link.is_valid());
 
@@ -284,7 +283,7 @@ void TestAll::links()
   QVERIFY(link.is_valid());
   QCOMPARE(link.id(), qsizetype(42));
 
-  Ligarium::Link<Property, Ligarium::ERelation::OneToMany> properties;
+  ligarium::Link<Property, ligarium::ERelation::OneToMany> properties;
 
   QVERIFY(properties.empty());
   QCOMPARE(properties.size(), qsizetype(0));
@@ -297,7 +296,7 @@ void TestAll::links()
 
 void TestAll::polymorphic_links()
 {
-  Ligarium::PolymorphicLink<Attachment> link;
+  ligarium::PolymorphicLink<Attachment> link;
 
   QVERIFY(link.empty());
   QCOMPARE(link.size(), qsizetype(0));
@@ -310,44 +309,44 @@ void TestAll::polymorphic_links()
 
 void TestAll::record_registry()
 {
-  Ligarium::RecordRegistry registry(m_db);
+  ligarium::RecordRegistry registry(m_db);
 
-  Ligarium::register_record<Property>(registry, Ligarium::Table::Property);
+  ligarium::register_record<Property>(registry, ligarium::Table::Property);
 
-  Ligarium::register_record<Tenant>(registry, Ligarium::Table::Tenant);
+  ligarium::register_record<Tenant>(registry, ligarium::Table::Tenant);
 
-  QVERIFY(registry.contains(Ligarium::Table::Property));
+  QVERIFY(registry.contains(ligarium::Table::Property));
 
-  QVERIFY(registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(registry.contains(ligarium::Table::Tenant));
 
-  QVERIFY(!registry.contains(Ligarium::Table::Attachment));
+  QVERIFY(!registry.contains(ligarium::Table::Attachment));
 
-  QCOMPARE(registry.dump(Ligarium::Table::Property, 12), QStringLiteral("Property(id=12, name=)"));
+  QCOMPARE(registry.dump(ligarium::Table::Property, 12), "Property(id=12, name=)");
 
-  QCOMPARE(registry.dump(Ligarium::Table::Tenant, 7), QStringLiteral("Tenant(id=7, name=)"));
+  QCOMPARE(registry.dump(ligarium::Table::Tenant, 7), "Tenant(id=7, name=)");
 
-  QCOMPARE(registry.dump(Ligarium::Table::Attachment, 1), QString{});
+  QCOMPARE(registry.dump(ligarium::Table::Attachment, 1), QString{});
 
   registry.clear();
 
-  QVERIFY(!registry.contains(Ligarium::Table::Property));
+  QVERIFY(!registry.contains(ligarium::Table::Property));
 
-  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(!registry.contains(ligarium::Table::Tenant));
 }
 
 void TestAll::widget_registry()
 {
-  Ligarium::WidgetRegistry registry;
+  ligarium::WidgetRegistry registry;
 
-  Ligarium::register_widget<PropertyWidget>(registry, Ligarium::Table::Property);
+  ligarium::register_widget<PropertyWidget>(registry, ligarium::Table::Property);
 
-  QVERIFY(registry.contains(Ligarium::Table::Property));
+  QVERIFY(registry.contains(ligarium::Table::Property));
 
-  QVERIFY(!registry.contains(Ligarium::Table::Tenant));
+  QVERIFY(!registry.contains(ligarium::Table::Tenant));
 
   QWidget parent;
 
-  QWidget* widget = registry.create(Ligarium::Table::Property, 42, &parent);
+  QWidget* widget = registry.create(ligarium::Table::Property, 42, &parent);
 
   QVERIFY(widget != nullptr);
   QCOMPARE(widget->parentWidget(), &parent);
@@ -361,66 +360,66 @@ void TestAll::widget_registry()
 
   registry.clear();
 
-  QVERIFY(!registry.contains(Ligarium::Table::Property));
+  QVERIFY(!registry.contains(ligarium::Table::Property));
 
-  QVERIFY(registry.create(Ligarium::Table::Property, 42) == nullptr);
+  QVERIFY(registry.create(ligarium::Table::Property, 42) == nullptr);
 }
 
 void TestAll::complete_workflow()
 {
-  const QString connection_name = QStringLiteral("test_all_workflow");
+  const QString connection_name = "test_all_workflow";
 
   {
-    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(":memory:");
 
     QVERIFY(connection.open());
 
-    Ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(connection);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    Ligarium::Database db(connection);
+    ligarium::Database db(connection);
 
     Tenant tenant(&db);
-    tenant.name = QStringLiteral("Alice");
+    tenant.name = "Alice";
 
     QVERIFY(tenant.save_record());
 
     Property property(&db);
-    property.name    = QStringLiteral("Main house");
+    property.name    = "Main house";
     property.surface = 150.0;
 
     QVERIFY(property.save_record());
 
-    Ligarium::Link<Tenant, Ligarium::ERelation::ManyToOne> tenant_link;
+    ligarium::Link<Tenant, ligarium::ERelation::ManyToOne> tenant_link;
 
     tenant_link.set_id(tenant.id());
 
     QVERIFY(tenant_link.is_valid());
     QCOMPARE(tenant_link.id(), tenant.id());
 
-    Ligarium::RecordRegistry record_registry(&db);
+    ligarium::RecordRegistry record_registry(&db);
 
-    record_registry.register_record(Ligarium::Table::Property, [&record_registry](qsizetype id) {
+    record_registry.register_record(ligarium::Table::Property, [&record_registry](qsizetype id) {
       const Property property = Property::read_record(*record_registry.database(), id);
 
       return property.dump();
     });
 
-    QCOMPARE(record_registry.dump(Ligarium::Table::Property, property.id()),
+    QCOMPARE(record_registry.dump(ligarium::Table::Property, property.id()),
              QStringLiteral("Property(id=%1, name=Main house)").arg(property.id()));
 
-    Ligarium::WidgetRegistry widget_registry;
+    ligarium::WidgetRegistry widget_registry;
 
-    Ligarium::register_widget<PropertyWidget>(widget_registry, Ligarium::Table::Property);
+    ligarium::register_widget<PropertyWidget>(widget_registry, ligarium::Table::Property);
 
     QWidget parent;
 
-    std::unique_ptr<QWidget> widget(widget_registry.create(Ligarium::Table::Property, property.id(), &parent));
+    std::unique_ptr<QWidget> widget(widget_registry.create(ligarium::Table::Property, property.id(), &parent));
 
     QVERIFY(widget != nullptr);
 

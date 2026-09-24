@@ -1,7 +1,7 @@
-#include "link.h"
+#include "ligarium/link.h"
 
-#include "database.h"
-#include "ligarium.h"
+#include "ligarium/database.h"
+#include "ligarium/ligarium.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -9,7 +9,7 @@
 namespace
 {
 
-QList<qsizetype> read_one_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec& spec, qsizetype owner_id)
+QList<qsizetype> read_one_to_many(const ligarium::Database& db, const ligarium::SqlLinkSpec& spec, qsizetype owner_id)
 {
   QList<qsizetype> ids;
 
@@ -19,7 +19,7 @@ QList<qsizetype> read_one_to_many(const Ligarium::Database& db, const Ligarium::
   query.prepare(QStringLiteral("SELECT id "
                                "FROM %1 "
                                "WHERE %2 = :owner_id")
-                    .arg(Ligarium::Table_to_str(spec.target_table), QString(spec.foreign_column)));
+                    .arg(ligarium::Table_to_str(spec.target_table), QString(spec.foreign_column)));
 
   query.bindValue(":owner_id", owner_id);
 
@@ -30,7 +30,7 @@ QList<qsizetype> read_one_to_many(const Ligarium::Database& db, const Ligarium::
   return ids;
 }
 
-QList<qsizetype> read_many_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec& spec, qsizetype owner_id)
+QList<qsizetype> read_many_to_many(const ligarium::Database& db, const ligarium::SqlLinkSpec& spec, qsizetype owner_id)
 {
   QList<qsizetype> ids;
 
@@ -40,7 +40,7 @@ QList<qsizetype> read_many_to_many(const Ligarium::Database& db, const Ligarium:
   query.prepare(QStringLiteral("SELECT %1 "
                                "FROM %2 "
                                "WHERE %3 = :owner_id")
-                    .arg(QString(spec.association_target_column), Ligarium::Table_to_str(spec.association_table),
+                    .arg(QString(spec.association_target_column), ligarium::Table_to_str(spec.association_table),
                          QString(spec.association_owner_column)));
 
   query.bindValue(":owner_id", owner_id);
@@ -52,7 +52,7 @@ QList<qsizetype> read_many_to_many(const Ligarium::Database& db, const Ligarium:
   return ids;
 }
 
-bool save_one_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec& spec, qsizetype owner_id,
+bool save_one_to_many(const ligarium::Database& db, const ligarium::SqlLinkSpec& spec, qsizetype owner_id,
                       const QList<qsizetype>& target_ids)
 {
   QSqlQuery query(db.connection());
@@ -63,7 +63,7 @@ bool save_one_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec&
   query.prepare(QStringLiteral("UPDATE %1 "
                                "SET %2 = NULL "
                                "WHERE %2 = :owner_id")
-                    .arg(Ligarium::Table_to_str(spec.target_table), QString(spec.foreign_column)));
+                    .arg(ligarium::Table_to_str(spec.target_table), QString(spec.foreign_column)));
 
   query.bindValue(":owner_id", owner_id);
 
@@ -73,7 +73,7 @@ bool save_one_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec&
   query.prepare(QStringLiteral("UPDATE %1 "
                                "SET %2 = :owner_id "
                                "WHERE id = :target_id")
-                    .arg(Ligarium::Table_to_str(spec.target_table), QString(spec.foreign_column)));
+                    .arg(ligarium::Table_to_str(spec.target_table), QString(spec.foreign_column)));
 
   for (const qsizetype target_id : target_ids) {
     query.bindValue(":owner_id", owner_id);
@@ -85,7 +85,7 @@ bool save_one_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec&
   return true;
 }
 
-bool save_many_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec& spec, qsizetype owner_id,
+bool save_many_to_many(const ligarium::Database& db, const ligarium::SqlLinkSpec& spec, qsizetype owner_id,
                        const QList<qsizetype>& target_ids)
 {
   QSqlQuery query(db.connection());
@@ -93,7 +93,7 @@ bool save_many_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec
   // Remove the existing associations.
   query.prepare(QStringLiteral("DELETE FROM %1 "
                                "WHERE %2 = :owner_id")
-                    .arg(Ligarium::Table_to_str(spec.association_table), QString(spec.association_owner_column)));
+                    .arg(ligarium::Table_to_str(spec.association_table), QString(spec.association_owner_column)));
 
   query.bindValue(":owner_id", owner_id);
 
@@ -102,7 +102,7 @@ bool save_many_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec
   // Recreate the current associations.
   query.prepare(QStringLiteral("INSERT INTO %1 (%2, %3) "
                                "VALUES (:owner_id, :target_id)")
-                    .arg(Ligarium::Table_to_str(spec.association_table), QString(spec.association_owner_column),
+                    .arg(ligarium::Table_to_str(spec.association_table), QString(spec.association_owner_column),
                          QString(spec.association_target_column)));
 
   for (const qsizetype target_id : target_ids) {
@@ -117,7 +117,7 @@ bool save_many_to_many(const Ligarium::Database& db, const Ligarium::SqlLinkSpec
 
 } // namespace
 
-bool Ligarium::save_link_ids(const Ligarium::Database& db, ERelation relation, const SqlLinkSpec& spec,
+bool ligarium::save_link_ids(const ligarium::Database& db, ERelation relation, const SqlLinkSpec& spec,
                              qsizetype owner_id, const QList<qsizetype>& target_ids)
 {
   switch (relation) {
@@ -135,7 +135,7 @@ bool Ligarium::save_link_ids(const Ligarium::Database& db, ERelation relation, c
   return false;
 }
 
-QVector<qsizetype> Ligarium::read_link_ids(const Ligarium::Database& db, ERelation relation, const SqlLinkSpec& spec,
+QVector<qsizetype> ligarium::read_link_ids(const ligarium::Database& db, ERelation relation, const SqlLinkSpec& spec,
                                            qsizetype owner_id)
 {
   QSqlQuery query(db.connection());
@@ -145,7 +145,7 @@ QVector<qsizetype> Ligarium::read_link_ids(const Ligarium::Database& db, ERelati
     query.prepare(QString("SELECT id "
                           "FROM %1 "
                           "WHERE %2 = :owner_id")
-                      .arg(Ligarium::Table_to_str(spec.target_table))
+                      .arg(ligarium::Table_to_str(spec.target_table))
                       .arg(spec.foreign_column));
 
     query.bindValue(":owner_id", owner_id);
@@ -158,7 +158,7 @@ QVector<qsizetype> Ligarium::read_link_ids(const Ligarium::Database& db, ERelati
                           "FROM %2 "
                           "WHERE %3 = :owner_id")
                       .arg(spec.association_target_column)
-                      .arg(Ligarium::Table_to_str(spec.association_table))
+                      .arg(ligarium::Table_to_str(spec.association_table))
                       .arg(spec.association_owner_column));
 
     query.bindValue(":owner_id", owner_id);
@@ -171,7 +171,7 @@ QVector<qsizetype> Ligarium::read_link_ids(const Ligarium::Database& db, ERelati
                           "FROM %1 "
                           "WHERE target_table = :target_table "
                           "AND target_id = :target_id")
-                      .arg(Ligarium::Table_to_str(spec.target_table)));
+                      .arg(ligarium::Table_to_str(spec.target_table)));
 
     query.bindValue(":target_table", static_cast<int>(spec.owner_table));
 
@@ -192,7 +192,7 @@ QVector<qsizetype> Ligarium::read_link_ids(const Ligarium::Database& db, ERelati
   return ids;
 }
 
-bool Ligarium::save_polymorphic_link(const Ligarium::Database& db, const SqlLinkSpec& spec, qsizetype owner_id,
+bool ligarium::save_polymorphic_link(const ligarium::Database& db, const SqlLinkSpec& spec, qsizetype owner_id,
                                      const QVector<qsizetype>& target_ids)
 {
   QSqlQuery query(db.connection());
@@ -201,7 +201,7 @@ bool Ligarium::save_polymorphic_link(const Ligarium::Database& db, const SqlLink
                         "SET target_table = NULL, target_id = NULL "
                         "WHERE target_table = :target_table "
                         "AND target_id = :target_id")
-                    .arg(Ligarium::Table_to_str(spec.target_table)));
+                    .arg(ligarium::Table_to_str(spec.target_table)));
 
   query.bindValue(":target_table", static_cast<int>(spec.owner_table));
 
@@ -213,7 +213,7 @@ bool Ligarium::save_polymorphic_link(const Ligarium::Database& db, const SqlLink
                         "SET target_table = :target_table, "
                         "    target_id = :target_id "
                         "WHERE id = :id")
-                    .arg(Ligarium::Table_to_str(spec.target_table)));
+                    .arg(ligarium::Table_to_str(spec.target_table)));
 
   for (const qsizetype attachment_id : target_ids) {
     query.bindValue(":target_table", static_cast<int>(spec.owner_table));

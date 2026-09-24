@@ -5,7 +5,7 @@
 
 #include <QList>
 
-namespace Ligarium
+namespace ligarium
 {
 
 
@@ -36,7 +36,7 @@ public:
   }
 };
 
-} // namespace Ligarium
+} // namespace ligarium
 
 
 #endif // POLYMORPHIC_LINK_H

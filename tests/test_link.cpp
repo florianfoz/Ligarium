@@ -1,15 +1,14 @@
 #include "ligarium_config.h"
 //
 
-#include "ligarium/link.h"
-
 #include <QtTest/QtTest>
+#include <ligarium/link.h>
 
 namespace
 {
 
-struct TestRecord : Ligarium::Record<TestRecord> {
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
+struct TestRecord : ligarium::Record<TestRecord> {
+  static constexpr auto static_table = ligarium::Table::Property;
 
   [[nodiscard]] QString dump() const override
   {
@@ -36,15 +35,15 @@ private slots:
 
   void oneToOne_default()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToOne> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToOne> link;
 
-    QCOMPARE(link.id(), Ligarium::INVALID_ID);
+    QCOMPARE(link.id(), ligarium::INVALID_ID);
     QVERIFY(!link.is_valid());
   }
 
   void oneToOne_valid()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToOne> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToOne> link;
 
     link.set_id(42);
 
@@ -54,16 +53,16 @@ private slots:
 
   void oneToOne_invalid()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToOne> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToOne> link;
 
-    link.set_id(Ligarium::INVALID_ID);
+    link.set_id(ligarium::INVALID_ID);
 
     QVERIFY(!link.is_valid());
   }
 
   void oneToOne_equality()
   {
-    using Link = Ligarium::Link<TestRecord, Ligarium::ERelation::OneToOne>;
+    using Link = ligarium::Link<TestRecord, ligarium::ERelation::OneToOne>;
 
     Link first;
     Link second;
@@ -85,15 +84,15 @@ private slots:
 
   void manyToOne_default()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToOne> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::ManyToOne> link;
 
-    QCOMPARE(link.id(), Ligarium::INVALID_ID);
+    QCOMPARE(link.id(), ligarium::INVALID_ID);
     QVERIFY(!link.is_valid());
   }
 
   void manyToOne_valid()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToOne> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::ManyToOne> link;
 
     link.set_id(123);
 
@@ -103,7 +102,7 @@ private slots:
 
   void manyToOne_equality()
   {
-    using Link = Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToOne>;
+    using Link = ligarium::Link<TestRecord, ligarium::ERelation::ManyToOne>;
 
     Link first;
     Link second;
@@ -126,7 +125,7 @@ private slots:
 
   void oneToMany_default()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToMany> link;
 
     QVERIFY(link.ids().isEmpty());
     QVERIFY(link.empty());
@@ -135,7 +134,7 @@ private slots:
 
   void oneToMany_single()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToMany> link;
 
     link.ids().append(42);
 
@@ -146,7 +145,7 @@ private slots:
 
   void oneToMany_multiple()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToMany> link;
 
     link.set_ids({10, 20, 30});
 
@@ -160,7 +159,7 @@ private slots:
 
   void oneToMany_clear()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::OneToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::OneToMany> link;
 
     link.set_ids({1, 2, 3});
 
@@ -174,7 +173,7 @@ private slots:
 
   void oneToMany_equality()
   {
-    using Link = Ligarium::Link<TestRecord, Ligarium::ERelation::OneToMany>;
+    using Link = ligarium::Link<TestRecord, ligarium::ERelation::OneToMany>;
 
     Link first;
     Link second;
@@ -200,7 +199,7 @@ private slots:
 
   void manyToMany_default()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::ManyToMany> link;
 
     QVERIFY(link.ids().isEmpty());
     QVERIFY(link.empty());
@@ -209,7 +208,7 @@ private slots:
 
   void manyToMany_single()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::ManyToMany> link;
 
     link.ids().append(42);
 
@@ -220,7 +219,7 @@ private slots:
 
   void manyToMany_multiple()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::ManyToMany> link;
 
     link.set_ids({100, 200, 300, 400});
 
@@ -234,7 +233,7 @@ private slots:
 
   void manyToMany_clear()
   {
-    Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToMany> link;
+    ligarium::Link<TestRecord, ligarium::ERelation::ManyToMany> link;
 
     link.set_ids({1, 2, 3});
 
@@ -246,7 +245,7 @@ private slots:
 
   void manyToMany_equality()
   {
-    using Link = Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToMany>;
+    using Link = ligarium::Link<TestRecord, ligarium::ERelation::ManyToMany>;
 
     Link first;
     Link second;
@@ -267,7 +266,7 @@ private slots:
 
   void sqlLinkSpec_default()
   {
-    Ligarium::SqlLinkSpec spec;
+    ligarium::SqlLinkSpec spec;
 
     QCOMPARE(spec.local_column, QStringView{});
     QCOMPARE(spec.foreign_column, QStringView{});
@@ -277,21 +276,21 @@ private slots:
 
   void sqlLinkSpec_oneToOne()
   {
-    Ligarium::SqlLinkSpec spec{.local_column = QStringView(u"property_id")};
+    ligarium::SqlLinkSpec spec{.local_column = QStringView(u"property_id")};
 
     QCOMPARE(spec.local_column, QStringView(u"property_id"));
   }
 
   void sqlLinkSpec_oneToMany()
   {
-    Ligarium::SqlLinkSpec spec{.target_table = Ligarium::Table{}, .foreign_column = QStringView(u"owner_id")};
+    ligarium::SqlLinkSpec spec{.target_table = ligarium::Table{}, .foreign_column = QStringView(u"owner_id")};
 
     QCOMPARE(spec.foreign_column, QStringView(u"owner_id"));
   }
 
   void sqlLinkSpec_manyToMany()
   {
-    Ligarium::SqlLinkSpec spec{.association_table         = Ligarium::Table{},
+    ligarium::SqlLinkSpec spec{.association_table         = ligarium::Table{},
                                .association_owner_column  = QStringView(u"property_id"),
                                .association_target_column = QStringView(u"tenant_id")};
 
@@ -308,9 +307,9 @@ private slots:
   {
     using Record = TestRecord;
 
-    auto field = Ligarium::link_OneToOne(
+    auto field = ligarium::link_OneToOne(
         QStringView(u"tenant_id"),
-        static_cast<Ligarium::Link<TestRecord, Ligarium::ERelation::OneToOne> Record::*>(nullptr));
+        static_cast<ligarium::Link<TestRecord, ligarium::ERelation::OneToOne> Record::*>(nullptr));
 
     QCOMPARE(field.name, QStringView(u"tenant_id"));
 
@@ -321,9 +320,9 @@ private slots:
   {
     using Record = TestRecord;
 
-    auto field = Ligarium::link_ManyToOne(
+    auto field = ligarium::link_ManyToOne(
         QStringView(u"property_id"),
-        static_cast<Ligarium::Link<TestRecord, Ligarium::ERelation::ManyToOne> Record::*>(nullptr));
+        static_cast<ligarium::Link<TestRecord, ligarium::ERelation::ManyToOne> Record::*>(nullptr));
 
     QCOMPARE(field.name, QStringView(u"property_id"));
 
@@ -340,7 +339,7 @@ private slots:
     // The actual loading/saving behavior is tested separately
     // once PolymorphicLink's API is covered.
 
-    QCOMPARE(Ligarium::ERelation::PolymorphicOneToMany, Ligarium::ERelation::PolymorphicOneToMany);
+    QCOMPARE(ligarium::ERelation::PolymorphicOneToMany, ligarium::ERelation::PolymorphicOneToMany);
   }
 };
 

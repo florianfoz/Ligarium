@@ -1,6 +1,6 @@
 # Database
 
-`Ligarium::Database` provides the database-facing layer of the ORM.
+`ligarium::Database` provides the database-facing layer of the ORM.
 
 It wraps a `QSqlDatabase` connection.
 
@@ -16,7 +16,7 @@ connection.setDatabaseName(":memory:");
 
 connection.open();
 
-Ligarium::Database db(connection);
+ligarium::Database db(connection);
 ```
 
 The database connection remains a Qt SQL connection.
@@ -58,7 +58,7 @@ For example:
 
 ```cpp
 auto result = db.find(
-    Ligarium::Table::Property,
+    ligarium::Table::Property,
     property_id
 );
 

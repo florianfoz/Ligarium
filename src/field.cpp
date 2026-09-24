@@ -1,14 +1,14 @@
-#include "field.h"
+#include "ligarium/field.h"
 
-#include "database.h"
+#include "ligarium/database.h"
 
-void Ligarium::emit_on_record_saved(Ligarium::Database& db, Table table)
+void ligarium::emit_on_record_saved(ligarium::Database& db, Table table)
 {
   emit db.signal_db_updated(table);
 }
 
 template <>
-struct Ligarium::SqlConverter<QString> {
+struct ligarium::SqlConverter<QString> {
   static QString from_sql(const QVariant& value)
   {
     return value.toString();
@@ -21,7 +21,7 @@ struct Ligarium::SqlConverter<QString> {
 };
 
 template <>
-struct Ligarium::SqlConverter<int> {
+struct ligarium::SqlConverter<int> {
   static int from_sql(const QVariant& value)
   {
     return value.toInt();
@@ -34,7 +34,7 @@ struct Ligarium::SqlConverter<int> {
 };
 
 template <>
-struct Ligarium::SqlConverter<qsizetype> {
+struct ligarium::SqlConverter<qsizetype> {
   static qsizetype from_sql(const QVariant& value)
   {
     return value.toInt();
@@ -47,7 +47,7 @@ struct Ligarium::SqlConverter<qsizetype> {
 };
 
 template <>
-struct Ligarium::SqlConverter<float> {
+struct ligarium::SqlConverter<float> {
   static float from_sql(const QVariant& value)
   {
     return value.toFloat();
@@ -60,7 +60,7 @@ struct Ligarium::SqlConverter<float> {
 };
 
 template <>
-struct Ligarium::SqlConverter<double> {
+struct ligarium::SqlConverter<double> {
   static double from_sql(const QVariant& value)
   {
     return value.toDouble();
@@ -73,7 +73,7 @@ struct Ligarium::SqlConverter<double> {
 };
 
 template <>
-struct Ligarium::SqlConverter<QDate> {
+struct ligarium::SqlConverter<QDate> {
   static QDate from_sql(const QVariant& value)
   {
     return value.toDate();
@@ -86,7 +86,7 @@ struct Ligarium::SqlConverter<QDate> {
 };
 
 template <>
-struct Ligarium::SqlConverter<QDateTime> {
+struct ligarium::SqlConverter<QDateTime> {
   static QDateTime from_sql(const QVariant& value)
   {
     return value.toDateTime();
@@ -101,7 +101,7 @@ struct Ligarium::SqlConverter<QDateTime> {
 
 template <typename T>
   requires std::is_enum_v<T>
-struct Ligarium::SqlConverter<T> {
+struct ligarium::SqlConverter<T> {
   static T from_sql(const QVariant& value)
   {
     return static_cast<T>(value.toInt());
