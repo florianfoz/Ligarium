@@ -5,6 +5,8 @@
 #include "field.h"
 #include "polymorphic_link.h"
 #include "record.h"
+#include "schema.h"
+#include "test_records.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -13,97 +15,6 @@
 #include <cstdint>
 #include <memory>
 
-
-class Property final : public Ligarium::Record<Property>
-{
-public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Property;
-
-  explicit Property(Ligarium::Database* db = nullptr)
-    : Record(db)
-  {
-  }
-
-  QString name;
-
-  [[nodiscard]]
-  QString dump() const override
-  {
-    return name;
-  }
-
-  static constexpr auto sql_fields()
-  {
-    return std::tuple{Ligarium::field(u"name", &Property::name)};
-  }
-
-  friend bool operator==(const Property& lhs, const Property& rhs)
-  {
-    return lhs.id() == rhs.id() && lhs.name == rhs.name;
-  }
-};
-
-class Tenant final : public Ligarium::Record<Tenant>
-{
-public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Tenant;
-
-  explicit Tenant(Ligarium::Database* db = nullptr)
-    : Record(db)
-  {
-  }
-
-  QString name;
-
-  [[nodiscard]]
-  QString dump() const override
-  {
-    return name;
-  }
-
-  static constexpr auto sql_fields()
-  {
-    return std::tuple{Ligarium::field(u"name", &Tenant::name)};
-  }
-
-  friend bool operator==(const Tenant& lhs, const Tenant& rhs)
-  {
-    return lhs.id() == rhs.id() && lhs.name == rhs.name;
-  }
-};
-
-class Attachment final : public Ligarium::Record<Attachment>
-{
-public:
-  static constexpr Ligarium::Table static_table = Ligarium::Table::Attachment;
-
-  explicit Attachment(Ligarium::Database* db = nullptr)
-    : Record(db)
-  {
-  }
-
-  Ligarium::Table table = Ligarium::Table::Property;
-
-  qsizetype col_id = Ligarium::INVALID_ID;
-  QString   path;
-
-  [[nodiscard]]
-  QString dump() const override
-  {
-    return path;
-  }
-
-  static constexpr auto sql_fields()
-  {
-    return std::tuple{Ligarium::field(u"table", &Attachment::table), Ligarium::field(u"col_id", &Attachment::col_id),
-                      Ligarium::field(u"path", &Attachment::path)};
-  }
-
-  friend bool operator==(const Attachment& lhs, const Attachment& rhs)
-  {
-    return lhs.id() == rhs.id() && lhs.table == rhs.table && lhs.col_id == rhs.col_id && lhs.path == rhs.path;
-  }
-};
 
 class TestPolymorphicLink : public QObject
 {
@@ -118,35 +29,19 @@ private slots:
   {
     const QString connection_name = QStringLiteral("ligarium_polymorphic_link_test");
 
-    m_sql_database = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
+    QSqlDatabase connection = QSqlDatabase::addDatabase(QStringLiteral("QSQLITE"), connection_name);
 
-    m_sql_database.setDatabaseName(QStringLiteral(":memory:"));
+    connection.setDatabaseName(QStringLiteral(":memory:"));
 
-    QVERIFY2(m_sql_database.open(), qPrintable(m_sql_database.lastError().text()));
+    QVERIFY(connection.open());
 
-    m_database = std::make_unique<Ligarium::Database>(m_sql_database);
+    Ligarium::SchemaBuilder schema(connection);
 
-    QSqlQuery query(m_sql_database);
+    if (!schema.create_all<Property, Tenant, Attachment>()) {
+      QVERIFY(qPrintable(schema.last_error()));
+    }
 
-    QVERIFY2(query.exec(QStringLiteral("CREATE TABLE property ("
-                                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                       "name TEXT NOT NULL"
-                                       ")")),
-             qPrintable(query.lastError().text()));
-
-    QVERIFY2(query.exec(QStringLiteral("CREATE TABLE tenant ("
-                                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                       "name TEXT NOT NULL"
-                                       ")")),
-             qPrintable(query.lastError().text()));
-
-    QVERIFY2(query.exec(QStringLiteral("CREATE TABLE attachment ("
-                                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                       "table INTEGER NOT NULL,"
-                                       "col_id INTEGER NOT NULL,"
-                                       "path TEXT NOT NULL"
-                                       ")")),
-             qPrintable(query.lastError().text()));
+    m_database = std::make_unique<Ligarium::Database>(connection);
   }
 
   void cleanupTestCase()

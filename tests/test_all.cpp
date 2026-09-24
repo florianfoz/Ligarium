@@ -218,7 +218,12 @@ void TestAll::database_and_records()
 
     QVERIFY(connection.open());
 
-    QSqlQuery schema(connection);
+    Ligarium::SchemaBuilder schema(connection);
+
+    if (!schema.create_all<Property, Tenant, Attachment>()) {
+      QVERIFY(qPrintable(schema.last_error()));
+    }
+
     m_db = new Ligarium::Database(connection);
 
     QVERIFY(m_db->is_open());
@@ -237,14 +242,11 @@ void TestAll::fields_and_records()
 
     QVERIFY(connection.open());
 
-    QSqlQuery schema(connection);
+    Ligarium::SchemaBuilder schema(connection);
 
-    QVERIFY(
-        schema.exec(QStringLiteral("CREATE TABLE Property ("
-                                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                   "name TEXT NOT NULL,"
-                                   "surface REAL NOT NULL"
-                                   ")")));
+    if (!schema.create_all<Property, Tenant, Attachment>()) {
+      QVERIFY(qPrintable(schema.last_error()));
+    }
 
     Ligarium::Database db(connection);
 
@@ -375,20 +377,11 @@ void TestAll::complete_workflow()
 
     QVERIFY(connection.open());
 
-    QSqlQuery schema(connection);
+    Ligarium::SchemaBuilder schema(connection);
 
-    QVERIFY(
-        schema.exec(QStringLiteral("CREATE TABLE Tenant ("
-                                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                   "name TEXT NOT NULL"
-                                   ")")));
-
-    QVERIFY(
-        schema.exec(QStringLiteral("CREATE TABLE Property ("
-                                   "id INTEGER PRIMARY KEY AUTOINCREMENT,"
-                                   "name TEXT NOT NULL,"
-                                   "surface REAL NOT NULL"
-                                   ")")));
+    if (!schema.create_all<Property, Tenant, Attachment>()) {
+      QVERIFY(qPrintable(schema.last_error()));
+    }
 
     Ligarium::Database db(connection);
 

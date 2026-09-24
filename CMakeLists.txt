@@ -48,11 +48,6 @@ file(GLOB_RECURSE LIGARIUM_HEADERS
 # Library
 # ---------------------------------------------------------------------------
 
-set(ENUMLITE_BUILD_QT ON CACHE BOOL "Build enumlite Qt backend") # HERE
-
-add_subdirectory(
-    external/enumlite
-)
 
 add_library(Ligarium ${LIGARIUM_SOURCES})
 
@@ -80,7 +75,6 @@ target_link_libraries(Ligarium
         Qt6::Core
         Qt6::Sql
         Qt6::Widgets
-        enumlite::enumlite_qt
 )
 
 target_compile_features(Ligarium
@@ -159,6 +153,9 @@ option(LIGARIUM_BUILD_TESTS
 if(LIGARIUM_BUILD_TESTS)
     find_package(Qt6 REQUIRED COMPONENTS Test)
 
+    add_subdirectory(tests)
+
+
     target_compile_options(Ligarium
     PRIVATE
         $<$<CXX_COMPILER_ID:GNU,Clang>:-include${CMAKE_CURRENT_SOURCE_DIR}/tests/ligarium_config.h>
@@ -167,5 +164,6 @@ if(LIGARIUM_BUILD_TESTS)
 
 
     enable_testing()
-    add_subdirectory(tests)
+
+
 endif()
