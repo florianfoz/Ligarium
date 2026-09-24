@@ -12,7 +12,7 @@ foreach(TEST_SOURCE ${LIGARIUM_TEST_SOURCES})
 
     target_link_libraries(${TEST_NAME}
         PRIVATE
-            Ligarium::Ligarium
+            ligarium::ligarium
             Qt6::Test
     )
 

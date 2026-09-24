@@ -123,22 +123,22 @@ install(
 )
 
 configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/ligariumConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfig.cmake"
+    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/LigariumConfig.cmake.in"
+    "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfig.cmake"
     INSTALL_DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/ligarium
 )
 
 write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfigVersion.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfigVersion.cmake"
     VERSION ${PROJECT_VERSION}
     COMPATIBILITY SameMajorVersion
 )
 
 install(
     FILES
-        "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfig.cmake"
-        "${CMAKE_CURRENT_BINARY_DIR}/ligariumConfigVersion.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfig.cmake"
+        "${CMAKE_CURRENT_BINARY_DIR}/LigariumConfigVersion.cmake"
     DESTINATION
         ${CMAKE_INSTALL_LIBDIR}/cmake/ligarium
 )
