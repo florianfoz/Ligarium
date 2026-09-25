@@ -1,8 +1,6 @@
 #ifndef LIGARIUM_SCHEMA_H
 #define LIGARIUM_SCHEMA_H
 
-#include "field.h"
-#include "record.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -100,6 +98,7 @@ public:
     const QString sql = QStringLiteral("CREATE TABLE IF NOT EXISTS %1 (%2)")
                             .arg(quote(Table_to_str(RECORD::static_table)), columns.join(", "));
 
+
     return execute(sql);
   }
 
@@ -145,7 +144,7 @@ private:
   template <RecordType RECORD, typename FIELD>
   void add_column_definition(QStringList& columns, const FIELD& field)
   {
-    if constexpr (requires { FIELD::relation; }) {
+    if constexpr (requires { typename FIELD::relation; }) {
       if constexpr (FIELD::relation == ERelation::OneToOne || FIELD::relation == ERelation::ManyToOne) {
         columns.append(QStringLiteral("%1 INTEGER").arg(quote(field.name)));
       }
@@ -153,7 +152,7 @@ private:
       return;
     }
 
-    if constexpr (requires { FIELD::value_type; }) {
+    if constexpr (requires { typename FIELD::value_type; }) {
       using Value = typename FIELD::value_type;
 
       if constexpr (requires { SqlType<Value>::value; }) {

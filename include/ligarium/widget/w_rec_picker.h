@@ -19,12 +19,12 @@ public:
   explicit W_Rec_Picker(QWidget* parent);
   ~W_Rec_Picker();
 
-  ETable rec_table;
+  ligarium::Table rec_table;
 
-  void refresh(ETable _rec_table);
+  void refresh(ligarium::Table _rec_table);
 
 signals:
-  void signal_on_selected(ETable _rec_table, qsizetype id);
+  void signal_on_selected(ligarium::Table _rec_table, qsizetype id);
 
 private slots:
   void on_b_clear_clicked();

@@ -19,10 +19,10 @@ public:
   explicit W_Many_Rec_Field(QWidget* parent = nullptr);
   ~W_Many_Rec_Field();
 
-  ETable           rec_table = ETable::NONE;
+  ligarium::Table  rec_table = ligarium::Table::NONE;
   QList<qsizetype> selection;
 
-  void refresh(ETable _rec_table);
+  void refresh(ligarium::Table _rec_table);
   void clear();
 
 private slots:

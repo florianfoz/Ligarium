@@ -125,6 +125,7 @@ namespace ligarium
 
 // user defined table
 enum class Table : uint8_t {
+  NONE = 0,           // mandatory!
   Property,
   Tenant,
   Attachment,
@@ -135,9 +136,11 @@ enum class Table : uint8_t {
 inline QString Table_to_str(Table table)
 {
   switch (table) {
+  case Table::NONE:       return "NONE"; // mandatory!
   case Table::Property:   return "Property";
   case Table::Tenant:     return "Tenant";
   case Table::Attachment: return "Attachment";
+  default:                return {};
   }
 }
 
@@ -150,6 +153,8 @@ inline QString Table_to_str(Table table)
 
 ```
 
+**The enum key `NONE = 0` is mandatory with the value 0, it's permit to determine an invalid state 
+
 **Include `ligarium_config.h` always before any ligarium file!**
 
 Define a record:
@@ -159,8 +164,6 @@ Define a record:
 class Property final : public ligarium::Record<Property>
 {
 public:
-  using ligarium::Record<Property>::Record;
-
   static constexpr auto static_table = ligarium::Table::Property;
 
   QString name;
@@ -178,12 +181,31 @@ public:
     };
   }
 
+  // optional but recommended
   friend bool operator==(const Property& lhs, const Property& rhs)
   {
     return lhs.id() == rhs.id() && lhs.name == rhs.name;
   }
 };
 ```
+
+To use your record with ligarium widgets, you must register your records:
+```cpp
+int main(int argc, char* argv[])
+{
+  QApplication application(argc, argv);
+
+  ligarium::register_widget<Property, W_Property_Creator, W_Property_View>();
+
+  ...
+}
+```
+You can register your record with a widget "creator" and a widget "view", 
+they will be used by ligarium to interact with ligarium widgets to pick, select, create, edit, view your records.
+
+> Hint: use a modification switch mode in your widget creator, check official ligarium implemented projects:
+> https://github.com/florianfoz/rentalis 
+
 
 Open a Qt SQL connection and use the record API:
 

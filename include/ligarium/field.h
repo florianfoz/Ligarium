@@ -2,8 +2,9 @@
 #ifndef LIGARIUM_FIELD_H
 #define LIGARIUM_FIELD_H
 
-#include "ligarium.h"
-#include "link.h"
+#include "ligarium/database.h"
+#include "ligarium/ligarium.h"
+#include "ligarium/link.h"
 
 #include <QDate>
 #include <QDateTime>
@@ -11,7 +12,6 @@
 #include <QStringList>
 #include <QVariant>
 #include <tuple>
-#include <type_traits>
 #include <utility>
 
 namespace ligarium
@@ -154,9 +154,8 @@ bool save_record_fields(QSqlQuery& query, const RECORD& record)
 {
   const QString sql = make_update_sql<RECORD>();
 
-  if (sql.isEmpty()) {
-    return false;
-  }
+  if (sql.isEmpty()) return false;
+
 
   query.prepare(sql);
 
@@ -174,9 +173,7 @@ bool save_record_fields(QSqlQuery& query, const RECORD& record)
 
   query.bindValue(":id", record.id());
 
-  if (!query.exec()) {
-    return false;
-  }
+  if (!record.database()->execute(query)) return false;
 
   emit_on_record_saved(*record.database(), RECORD::static_table);
 

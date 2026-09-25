@@ -16,10 +16,10 @@ class W_Rec_Manager : public QWidget
   Q_OBJECT
 
 public:
-  explicit W_Rec_Manager(ETable rec_table);
+  explicit W_Rec_Manager(ligarium::Table rec_table);
   ~W_Rec_Manager();
 
-  ETable rec_table;
+  ligarium::Table rec_table;
 
   void refresh();
 

@@ -8,8 +8,10 @@ namespace ligarium
 
 // user defined table
 enum class Table : uint8_t {
+  NONE = 0, // mandatory
   Property,
   Tenant,
+  Tenant_Property,
   Attachment,
 };
 
@@ -17,9 +19,12 @@ enum class Table : uint8_t {
 inline QString Table_to_str(Table table)
 {
   switch (table) {
-  case Table::Property:   return "Property";
-  case Table::Tenant:     return "Tenant";
-  case Table::Attachment: return "Attachment";
+  case Table::NONE:            return "NONE";
+  case Table::Property:        return "Property";
+  case Table::Tenant:          return "Tenant";
+  case Table::Tenant_Property: return "Tenant_Property";
+  case Table::Attachment:      return "Attachment";
+  default:                     return {};
   }
 }
 

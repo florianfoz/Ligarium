@@ -14,6 +14,7 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Sql Widgets)
@@ -22,6 +23,10 @@ find_package(Qt6 REQUIRED COMPONENTS Core Sql Widgets)
 # ---------------------------------------------------------------------------
 # Sources
 # ---------------------------------------------------------------------------
+
+set(CMAKE_AUTOUIC_SEARCH_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui
+)
 
 file(GLOB_RECURSE LIGARIUM_SOURCES
     CONFIGURE_DEPENDS
@@ -38,10 +43,28 @@ file(GLOB_RECURSE LIGARIUM_HEADERS
     "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/ligarium.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/database.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/link.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/polymorphic_link.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/record.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/record_registry.h"
     "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/widget_registry.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/ui/.h"
+)
+
+
+# command getter
+# find ./ui -type f -name "*.ui" | sort
+set(UI
+
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_field.ui"
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_manager.ui"
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_many_elem.ui"
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_many_field.ui"
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_picker.ui"
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_selectable.ui"
+"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_tile_view.ui"
+
+)
+
+set(CMAKE_AUTOUIC_SEARCH_PATHS
+    ${CMAKE_CURRENT_SOURCE_DIR}/ui
 )
 
 # ---------------------------------------------------------------------------
@@ -56,6 +79,7 @@ add_library(ligarium::ligarium ALIAS ligarium)
 target_sources(ligarium
     PRIVATE
         ${LIGARIUM_SOURCES}
+        ${UI}
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS
