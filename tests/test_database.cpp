@@ -58,7 +58,9 @@ private slots:
 
   void connection()
   {
-    QCOMPARE(&m_database->connection(), &m_connection);
+    QVERIFY(m_database->connection().isValid());
+    QVERIFY(m_database->connection().isOpen());
+    QCOMPARE(m_database->connection().connectionName(), m_connection.connectionName());
 
     QVERIFY(m_database->is_open());
   }
@@ -69,12 +71,11 @@ private slots:
 
     QVERIFY(
         query.prepare("INSERT INTO property "
-                      "(name, surface, active) "
-                      "VALUES (:name, :surface, :active)"));
+                      "(name, surface) "
+                      "VALUES (:name, :surface)"));
 
     query.bindValue(":name", "House");
     query.bindValue(":surface", 120.5);
-    query.bindValue(":active", true);
 
     QVERIFY(m_database->execute(query));
 
@@ -121,9 +122,7 @@ private slots:
 
     QVERIFY(result.has_value());
 
-    QSqlQuery query = *result;
-
-    QVERIFY(query.next());
+    QSqlQuery& query = *result;
 
     QCOMPARE(query.value("id").toLongLong(), id);
   }
@@ -132,11 +131,7 @@ private slots:
   {
     const auto result = m_database->find(ligarium::Table::Property, 999999);
 
-    QVERIFY(result.has_value());
-
-    QSqlQuery query = *result;
-
-    QVERIFY(!query.next());
+    QVERIFY(!result.has_value());
   }
 
   void all()
@@ -230,8 +225,6 @@ private slots:
 
     QVERIFY(m_database->is_valid_column(ligarium::Table::Property, "surface"));
 
-    QVERIFY(m_database->is_valid_column(ligarium::Table::Property, "active"));
-
     QVERIFY(!m_database->is_valid_column(ligarium::Table::Property, "unknown_column"));
   }
 
@@ -249,8 +242,6 @@ private slots:
 
     QSqlQuery query = std::move(*result);
 
-    QVERIFY(query.next());
-
     QCOMPARE(query.value("name").toString(), "Saved property");
   }
 
@@ -265,8 +256,6 @@ private slots:
     QVERIFY(result.has_value());
 
     QSqlQuery query = *result;
-
-    QVERIFY(query.next());
 
     QCOMPARE(query.value("surface").toDouble(), 123.45);
   }

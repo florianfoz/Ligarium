@@ -1,12 +1,11 @@
 #ifndef LIGARIUM_LINK_H
 #define LIGARIUM_LINK_H
 
-#include "ligarium.h"
-#include "polymorphic_link.h"
+#include "ligarium/ligarium.h"
+#include "ligarium/record.h"
 
 #include <QList>
 #include <QStringView>
-#include <type_traits>
 #include <utility>
 
 class QSqlQuery;
@@ -200,6 +199,56 @@ private:
   QList<qsizetype> m_ids;
 };
 
+
+/**
+ * @brief A polymorphic relationship.
+ */
+template <RecordFieldType TARGET>
+class Link<TARGET, ERelation::PolymorphicOneToMany>
+{
+public:
+  void set_ids(QList<qsizetype> ids) noexcept
+  {
+    m_ids = std::move(ids);
+  }
+
+  [[nodiscard]]
+  QList<qsizetype>& ids() noexcept
+  {
+    return m_ids;
+  }
+
+  [[nodiscard]]
+  const QList<qsizetype>& ids() const noexcept
+  {
+    return m_ids;
+  }
+
+  [[nodiscard]] bool empty() const noexcept
+  {
+    return m_ids.isEmpty();
+  }
+
+  [[nodiscard]] qsizetype size() const noexcept
+  {
+    return m_ids.size();
+  }
+
+  [[nodiscard]] QList<TARGET> get(Database& db) const
+  {
+    QList<TARGET> result;
+    result.reserve(m_ids.size());
+
+    for (const qsizetype id : m_ids) result.append(read_record<TARGET>(db, id));
+
+    return result;
+  }
+
+
+private:
+  QList<qsizetype> m_ids;
+};
+
 /**
  * @brief SQL metadata for a relationship.
  */
@@ -294,7 +343,9 @@ constexpr auto link_ManyToMany(QStringView name, Link<TARGET, ERelation::ManyToM
 }
 
 template <RecordFieldType RECORD, RecordFieldType TARGET>
-constexpr auto link_PolymorphicOneToMany(QStringView name, PolymorphicLink<TARGET> RECORD::* member, Table target_table)
+constexpr auto link_PolymorphicOneToMany(QStringView                                   name,
+                                         Link<TARGET, ERelation::PolymorphicOneToMany> RECORD::* member,
+                                         Table                                                   target_table)
 {
   return SqlLinkField<RECORD, TARGET, ERelation::PolymorphicOneToMany>{
       .name   = name,

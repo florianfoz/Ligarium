@@ -40,13 +40,13 @@ W_Many_Rec_Field::~W_Many_Rec_Field()
 }
 
 
-void W_Many_Rec_Field::refresh(ETable _rec_table)
+void W_Many_Rec_Field::refresh(ligarium::Table _rec_table)
 {
   clear();
 
   rec_table = _rec_table;
-  ui->b_add->setText(tr("Add %1").arg(ETable_to_str(rec_table)));
-  ui->groupBox->setTitle(ETable_to_str(rec_table));
+  ui->b_add->setText(tr("Add %1").arg(ligarium::Table_to_str(rec_table)));
+  ui->groupBox->setTitle(ligarium::Table_to_str(rec_table));
 
   for (auto elem : selection) {
     auto* w = new W_Many_Rec_Elem(this);
@@ -68,7 +68,7 @@ void W_Many_Rec_Field::on_b_add_clicked()
   auto* w = new W_Rec_Picker(this);
   w->refresh(rec_table);
 
-  connect(w, &W_Rec_Picker::signal_on_selected, [this](ETable _rec_table, qsizetype _id) {
+  connect(w, &W_Rec_Picker::signal_on_selected, [this](ligarium::Table _rec_table, qsizetype _id) {
     selection.append(_id);
     refresh(rec_table);
   });

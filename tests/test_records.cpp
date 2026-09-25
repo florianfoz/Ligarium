@@ -5,7 +5,9 @@
 
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QSqlField>
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QtTest>
 #include <cstdint>
 #include <ligarium/database.h>
@@ -20,8 +22,8 @@ class TestRecord : public QObject
   Q_OBJECT
 
 private:
-  QSqlDatabase                        m_sql_database;
-  std::unique_ptr<ligarium::Database> m_database;
+  QSqlDatabase        m_sql_database;
+  ligarium::Database* m_database;
 
 private slots:
 
@@ -29,31 +31,31 @@ private slots:
   {
     const QString connection_name = "ligarium_record_test";
 
-    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
+    m_sql_database = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(":memory:");
+    m_sql_database.setDatabaseName(":memory:");
 
-    QVERIFY(connection.open());
+    QVERIFY(m_sql_database.open());
 
-    ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(m_sql_database);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_database = std::make_unique<ligarium::Database>(connection);
-  }
+    QStringList tables = m_sql_database.tables();
 
-  void cleanupTestCase()
-  {
-    m_database.reset();
+    for (const QString& table : tables) {
+      QSqlRecord record = m_sql_database.record(table);
 
-    const QString connection_name = m_sql_database.connectionName();
+      qDebug() << "\nTable :" << table;
 
-    m_sql_database.close();
-    m_sql_database = {};
+      for (int i = 0; i < record.count(); ++i) {
+        qDebug() << "  " << record.fieldName(i) << record.field(i).metaType().name();
+      }
+    }
 
-    QSqlDatabase::removeDatabase(connection_name);
+    m_database = new ligarium::Database(m_sql_database);
   }
 
   void recordType()
@@ -67,7 +69,8 @@ private slots:
 
   void defaultState()
   {
-    Property property;
+    auto invalid_db = ligarium::Database(QSqlDatabase());
+    auto property   = Property(); // <=> Property::invalid()
 
     QCOMPARE(property.id(), ligarium::INVALID_ID);
 
@@ -86,15 +89,13 @@ private slots:
 
   void databaseAssociation()
   {
-    Property property(m_database.get());
+    auto property = Property::create_record(*m_database);
 
-    QCOMPARE(property.database(), m_database.get());
+    QCOMPARE(property.database()->connection().connectionName(), m_database->connection().connectionName());
 
-    QCOMPARE(property.id(), ligarium::INVALID_ID);
+    QVERIFY(property.is_valid());
 
-    QVERIFY(!property.is_valid());
-
-    QVERIFY(!static_cast<bool>(property));
+    QVERIFY(static_cast<bool>(property));
   }
 
   void tableMapping()
@@ -105,11 +106,11 @@ private slots:
 
     QCOMPARE(Attachment::static_table, ligarium::Table::Attachment);
 
-    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Property), "property");
+    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Property), "Property");
 
-    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Tenant), "tenant");
+    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Tenant), "Tenant");
 
-    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Attachment), "attachment");
+    QCOMPARE(ligarium::Table_to_str(ligarium::Table::Attachment), "Attachment");
   }
 
   void createRecord()
@@ -198,7 +199,7 @@ private slots:
 
   void saveNewRecord()
   {
-    Property property(m_database.get());
+    auto property = Property::create_record(*m_database);
 
     property.name = "House";
 
@@ -274,16 +275,16 @@ private slots:
 
   void dump()
   {
-    Property property(m_database.get());
+    auto property = Property::create_record(*m_database);
 
     property.name = "House";
 
-    QCOMPARE(property.dump(), "House");
+    QCOMPARE(property.dump(), "property: House, 0 m²");
   }
 
   void dirtyNewRecord()
   {
-    Property property(m_database.get());
+    auto property = Property::create_record(*m_database);
 
     property.name = "Unsaved";
 
@@ -326,7 +327,7 @@ private slots:
 
     QVERIFY(query.next());
 
-    const qsizetype second_id = query.value(0).toLongLong();
+    const qsizetype second_id = query.value(1).toLongLong();
 
     const Property property = Property::read_record(*m_database, first_id);
 
@@ -335,7 +336,7 @@ private slots:
 
   void newerIsDirtyAlias()
   {
-    Property property(m_database.get());
+    auto property = Property::create_record(*m_database);
 
     property.name = "Unsaved";
 
@@ -347,8 +348,8 @@ private slots:
     QSqlQuery query(m_sql_database);
 
     QVERIFY2(query.exec("INSERT INTO attachment "
-                        "(table, col_id, path) "
-                        "VALUES (0, 42, '/tmp/document.pdf')"),
+                        "(target_table, target_id, path) "
+                        "VALUES ('Property', 42, '/tmp/document.pdf')"),
              qPrintable(query.lastError().text()));
 
     const qsizetype id = query.lastInsertId().toLongLong();
@@ -357,17 +358,29 @@ private slots:
 
     QCOMPARE(attachment.id(), id);
 
-    QCOMPARE(attachment.table, ligarium::Table::Property);
+    QCOMPARE(attachment.target_table, ligarium::Table_to_str(ligarium::Table::Property));
 
-    QCOMPARE(attachment.col_id, qsizetype(42));
+    QCOMPARE(attachment.target_id, qsizetype(42));
 
     QCOMPARE(attachment.path, "/tmp/document.pdf");
 
-    QCOMPARE(attachment.dump(), "/tmp/document.pdf");
+    QCOMPARE(attachment.dump(), "attachment: /tmp/document.pdf in Property, id: 42");
+  }
+
+  void cleanupTestCase()
+  {
+    // delete m_database;
+    //
+    // const QString connection_name = m_sql_database.connectionName();
+    //
+    // m_sql_database.close();
+    // m_sql_database = {};
+    //
+    // QSqlDatabase::removeDatabase(connection_name);
   }
 };
 
 
 QTEST_MAIN(TestRecord)
 
-#include "test_record.moc"
+#include "test_records.moc"

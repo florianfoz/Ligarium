@@ -1,9 +1,8 @@
 #ifndef RECORD_H
 #define RECORD_H
 
-#include "ligarium.h"
-//
-#include "database.h"
+#include "ligarium/database.h"
+#include "ligarium/ligarium.h"
 
 #include <QSqlQuery>
 
@@ -95,21 +94,31 @@ inline bool delete_record(Database& db, Table table, qsizetype id, bool wmsg = f
   return db.remove(table, id);
 }
 
+
 template <RecordType T>
 [[nodiscard]]
 T read_record(Database& db, qsizetype id)
 {
-  if (id == INVALID_ID) return T{};
+  if (!db.is_open() || id == INVALID_ID) return T::invalid();
 
   auto valid_sql = db.find(T::static_table, id);
 
-  if (!valid_sql) return T{};
+  if (!valid_sql) return T::invalid();
 
-  auto& query = valid_sql.value();
+  QSqlQuery& query = valid_sql.value();
 
-  if (!query.isValid()) return T{};
+  if (!query.isValid()) return T::invalid();
 
   return from_sql<T>(db, query);
+}
+
+
+template <RecordType T>
+[[nodiscard]]
+QString dump_record(Database& db, qsizetype id)
+{
+  auto rec = read_record<T>(db, id);
+  return rec.dump();
 }
 
 
@@ -128,15 +137,14 @@ bool save_record(T* rec)
 
 template <RecordType T>
 [[nodiscard]]
+// must work on the current line
 T from_sql(Database& db, QSqlQuery& query)
 {
   T out;
 
   out.set_database(&db);
 
-  if (!query.isValid()) {
-    if (!query.next()) return T{};
-  }
+  if (!query.isValid()) return T::invalid();
 
   // Read columns belonging to the current record.
   read_record_fields(out, query);
@@ -157,7 +165,7 @@ QList<T> all_records(const Database& db)
 
   if (!valid_sql) return {};
 
-  auto& query = valid_sql.value();
+  QSqlQuery& query = valid_sql.value();
 
   if (!query.isActive()) return {};
 
@@ -166,6 +174,9 @@ QList<T> all_records(const Database& db)
   while (query.next()) {
     records.append(from_sql<T>(const_cast<Database&>(db), query));
   }
+
+  qDebug() << "out";
+
 
   return records;
 }
@@ -177,7 +188,7 @@ inline QList<qsizetype> all_records_id(const Database& db, Table table)
 
   if (!valid_sql) return {};
 
-  auto& query = valid_sql.value();
+  QSqlQuery& query = valid_sql.value();
 
   if (!query.isActive()) return {};
 
@@ -186,7 +197,6 @@ inline QList<qsizetype> all_records_id(const Database& db, Table table)
   while (query.next()) {
     ids.append(query.value("id").toLongLong());
   }
-
   return ids;
 }
 
@@ -206,11 +216,7 @@ template <class DERIVED>
 class Record
 {
 public:
-  explicit Record(Database* db = nullptr)
-    : m_db(db)
-  {
-  }
-
+  Record() noexcept = default;
 
   [[nodiscard]]
   qsizetype id() const
@@ -249,6 +255,7 @@ public:
   [[nodiscard]]
   static DERIVED create_record(Database& db)
   {
+    if (!db.is_open()) return invalid();
     auto id = ligarium::create_record(db, DERIVED::static_table);
     return ligarium::read_record<DERIVED>(db, id);
   }
@@ -256,7 +263,7 @@ public:
   [[nodiscard]]
   static DERIVED read_record(Database& db, qsizetype id)
   {
-    if (id == INVALID_ID) return DERIVED();
+    if (id == INVALID_ID || !db.is_open()) return invalid();
     return ligarium::read_record<DERIVED>(db, id);
   }
 
@@ -301,16 +308,13 @@ public:
     return ligarium::is_dirty<DERIVED>(*m_db, *static_cast<const DERIVED*>(this), other_id);
   }
 
-  [[nodiscard]] virtual QString dump() const
-  {
-    return QObject::tr("UNDEFINED RECORD");
-  };
+  [[nodiscard]] virtual QString dump() const = 0;
 
 
   [[nodiscard]]
   bool is_valid() const
   {
-    if (m_db == nullptr) return false;
+    if (m_db == nullptr || m_id == INVALID_ID) return false;
     return ligarium::contains_record(*m_db, DERIVED::static_table, m_id);
   }
 
@@ -318,6 +322,13 @@ public:
   {
     return is_valid();
   }
+
+  [[nodiscard]]
+  static DERIVED invalid()
+  {
+    return {};
+  }
+
 
 private:
   qsizetype m_id = INVALID_ID;

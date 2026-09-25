@@ -13,11 +13,11 @@ class W_Rec_Selectable : public QWidget
   Q_OBJECT
 
 public:
-  explicit W_Rec_Selectable(ETable table, qsizetype id);
+  explicit W_Rec_Selectable(ligarium::Table table, qsizetype id);
   ~W_Rec_Selectable();
 
-  ETable    table;
-  qsizetype id;
+  ligarium::Table table;
+  qsizetype       id;
 
   void select(bool selected);
 

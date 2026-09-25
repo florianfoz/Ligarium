@@ -99,16 +99,17 @@ struct ligarium::SqlConverter<QDateTime> {
 };
 
 
-template <typename T>
-  requires std::is_enum_v<T>
-struct ligarium::SqlConverter<T> {
-  static T from_sql(const QVariant& value)
-  {
-    return static_cast<T>(value.toInt());
-  }
-
-  static QVariant to_sql(T value)
-  {
-    return static_cast<int>(value);
-  }
-};
+// not reliable
+// template <typename T>
+//   requires std::is_enum_v<T>
+// struct ligarium::SqlConverter<T> {
+//   static T from_sql(const QVariant& value)
+//   {
+//     return static_cast<T>(value.toInt());
+//   }
+//
+//   static QVariant to_sql(T value)
+//   {
+//     return static_cast<int>(value);
+//   }
+// };

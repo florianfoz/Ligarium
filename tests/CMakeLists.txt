@@ -1,13 +1,8 @@
-file(GLOB_RECURSE LIGARIUM_TEST_SOURCES
-    CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp"
-)
+set(CMAKE_AUTOMOC ON)
 
-foreach(TEST_SOURCE ${LIGARIUM_TEST_SOURCES})
-    get_filename_component(TEST_NAME ${TEST_SOURCE} NAME_WE)
-
+function(add_ligarium_test TEST_NAME)
     add_executable(${TEST_NAME}
-        ${TEST_SOURCE}
+        ${ARGN}
     )
 
     target_link_libraries(${TEST_NAME}
@@ -25,4 +20,32 @@ foreach(TEST_SOURCE ${LIGARIUM_TEST_SOURCES})
         NAME ${TEST_NAME}
         COMMAND ${TEST_NAME}
     )
-endforeach()
+endfunction()
+
+add_ligarium_test(test_all
+    test_all.cpp
+    test_widget_registry.h
+    test_records.h
+)
+
+add_ligarium_test(test_database
+    test_database.cpp
+)
+
+add_ligarium_test(test_link
+    test_link.cpp
+)
+
+add_ligarium_test(test_polymorphic_link
+    test_polymorphic_link.cpp
+)
+
+add_ligarium_test(test_records
+    test_records.cpp
+    test_records.h
+)
+
+add_ligarium_test(test_widget_registry
+    test_widget_registry.cpp
+    test_widget_registry.h
+)

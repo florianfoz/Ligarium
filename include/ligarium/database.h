@@ -1,7 +1,7 @@
 #ifndef LIGARIUM_DATABASE_H
 #define LIGARIUM_DATABASE_H
 
-#include "ligarium.h"
+#include "ligarium/ligarium.h"
 
 #include <QSqlDatabase>
 #include <QSqlQuery>
@@ -10,6 +10,8 @@
 
 namespace ligarium
 {
+
+class WidgetRegistry;
 
 class Database final : public QObject
 {
@@ -25,6 +27,9 @@ public:
 
   [[nodiscard]]
   bool execute(QSqlQuery& query) const;
+
+  [[nodiscard]]
+  bool execute_next(QSqlQuery& query) const;
 
   [[nodiscard]]
   qsizetype last_insert_id() const;
@@ -55,10 +60,6 @@ public:
 
   [[nodiscard]]
   bool remove(Table table, qsizetype record_id) const;
-
-private:
-  [[nodiscard]]
-  static QString table_name(Table table);
 
 private:
   QSqlDatabase m_database;

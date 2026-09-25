@@ -30,33 +30,33 @@ W_Rec_Picker::~W_Rec_Picker()
 }
 
 template <typename T, Ligarium::RecordType<T> REC>
-QList<qsizeype> all_records_id() {
-
+QList<qsizeype> all_records_id()
+{
 }
 
-void W_Rec_Picker::refresh(ETable _rec_table)
+void W_Rec_Picker::refresh(ligarium::Table _rec_table)
 {
   rec_table = _rec_table;
   ui->view->clear();
 
-  setWindowTitle(QObject::tr("Select %1").arg(ETable_to_str(rec_table)));
+  setWindowTitle(QObject::tr("Select %1").arg(ligarium::Table_to_str(rec_table)));
 
-  #define TBL(table) ids = table::all_records_id();
+#define TBL(table) ids = table::all_records_id();
 
   QList<qsizetype> ids = TBL(_rec_table);
 
   switch (rec_table) {
-  case ETable::Attachment:      ids = Attachment::all_records_id(); break;
-  case ETable::Damage:          ids = Damage::all_records_id(); break;
-  case ETable::Invoice:         ids = Invoice::all_records_id(); break;
-  case ETable::Landlord:        ids = Landlord::all_records_id(); break;
-  case ETable::Lease_Agreement: ids = Lease_Agreement::all_records_id(); break;
-  case ETable::Maintenance:     ids = Maintenance::all_records_id(); break;
-  case ETable::Property:        ids = Property::all_records_id(); break;
-  case ETable::Receipt:         ids = Receipt::all_records_id(); break;
-  case ETable::Rent:            ids = Rent::all_records_id(); break;
-  case ETable::Tenant:          ids = Tenant::all_records_id(); break;
-  default:                      assert(false && "Invalid record table");
+  case ligarium::Table::Attachment:      ids = Attachment::all_records_id(); break;
+  case ligarium::Table::Damage:          ids = Damage::all_records_id(); break;
+  case ligarium::Table::Invoice:         ids = Invoice::all_records_id(); break;
+  case ligarium::Table::Landlord:        ids = Landlord::all_records_id(); break;
+  case ligarium::Table::Lease_Agreement: ids = Lease_Agreement::all_records_id(); break;
+  case ligarium::Table::Maintenance:     ids = Maintenance::all_records_id(); break;
+  case ligarium::Table::Property:        ids = Property::all_records_id(); break;
+  case ligarium::Table::Receipt:         ids = Receipt::all_records_id(); break;
+  case ligarium::Table::Rent:            ids = Rent::all_records_id(); break;
+  case ligarium::Table::Tenant:          ids = Tenant::all_records_id(); break;
+  default:                               assert(false && "Invalid record table");
   }
 
   for (auto id : ids) {

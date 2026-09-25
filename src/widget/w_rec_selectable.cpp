@@ -41,7 +41,7 @@
 #include "entity/rent.h"
 #include "entity/tenant.h"
 
-W_Rec_Selectable::W_Rec_Selectable(ETable table, qsizetype id)
+W_Rec_Selectable::W_Rec_Selectable(ligarium::Table table, qsizetype id)
   : QWidget(nullptr)
   , table(table)
   , id(id)
@@ -52,19 +52,19 @@ W_Rec_Selectable::W_Rec_Selectable(ETable table, qsizetype id)
   QWidget* w = nullptr;
 
   switch (table) {
-  case ETable::Attachment:  w = new W_Attachment(id); break;
-  case ETable::Damage:      w = new W_Damage(id); break;
-  case ETable::Invoice:     w = new W_Invoice(id); break;
-  case ETable::Landlord:    w = new W_Landlord(id); break;
-  // case ETable::Lease_Agreement: w = new W_Lease_Agreement(id); break;
-  case ETable::Maintenance: w = new W_Maintenance(id); break;
-  case ETable::Property:    w = new W_Property(id); break;
-  // case ETable::Property_Feature: w = new W_Property_Feature(id); break;
-  // case ETable::Property_Room:    w = new W_Property_Room(id); break;
-  case ETable::Receipt:     w = new W_Receipt(id); break;
-  case ETable::Rent:        w = new W_Rent(id); break;
-  case ETable::Tenant:      w = new W_Tenant(id); break;
-  default:                  assert(false && "Must be a valid table");
+  case ligarium::Table::Attachment:  w = new W_Attachment(id); break;
+  case ligarium::Table::Damage:      w = new W_Damage(id); break;
+  case ligarium::Table::Invoice:     w = new W_Invoice(id); break;
+  case ligarium::Table::Landlord:    w = new W_Landlord(id); break;
+  // case ligarium::Table::Lease_Agreement: w = new W_Lease_Agreement(id); break;
+  case ligarium::Table::Maintenance: w = new W_Maintenance(id); break;
+  case ligarium::Table::Property:    w = new W_Property(id); break;
+  // case ligarium::Table::Property_Feature: w = new W_Property_Feature(id); break;
+  // case ligarium::Table::Property_Room:    w = new W_Property_Room(id); break;
+  case ligarium::Table::Receipt:     w = new W_Receipt(id); break;
+  case ligarium::Table::Rent:        w = new W_Rent(id); break;
+  case ligarium::Table::Tenant:      w = new W_Tenant(id); break;
+  default:                           assert(false && "Must be a valid table");
   }
 
   connect(this, &W_Rec_Selectable::signal_selected, [this](qsizetype _id) { select(_id == this->id); });
@@ -100,21 +100,21 @@ void W_Rec_Selectable::on_b_edit_clicked()
   QDialog* w = nullptr;
 
   switch (table) {
-  // case ETable::Attachment:       w = new W_Attachment_Creator(id); break;
-  case ETable::Damage:      w = new W_Damage_Creator(id); break;
-  case ETable::Invoice:     w = new W_Invoice_Creator(id); break;
-  case ETable::Landlord:    w = new W_Landlord_Creator(id); break;
-  // case ETable::LandlordP:        w = new W_LandlordP_Creator(id); break;
-  // case ETable::Lease_Agreement:  w = new W_Lease_Agreement_Creator(id); break;
-  case ETable::Maintenance: w = new W_Maintenance_Creator(id); break;
-  case ETable::Property:    w = new W_Property_Creator(id); break;
-  // case ETable::Property_Feature: w = new W_Property_Feature_Creator(id); break;
-  // case ETable::Property_Room:    w = new W_Property_Room_Creator(id); break;
-  case ETable::Receipt:     w = new W_Receipt_Creator(id); break;
-  // case ETable::Rent:        w = new W_Rent_Creator(id); break;
-  case ETable::Tenant:      w = new W_Tenant_Creator(id); break;
+  // case ligarium::Table::Attachment:       w = new W_Attachment_Creator(id); break;
+  case ligarium::Table::Damage:      w = new W_Damage_Creator(id); break;
+  case ligarium::Table::Invoice:     w = new W_Invoice_Creator(id); break;
+  case ligarium::Table::Landlord:    w = new W_Landlord_Creator(id); break;
+  // case ligarium::Table::LandlordP:        w = new W_LandlordP_Creator(id); break;
+  // case ligarium::Table::Lease_Agreement:  w = new W_Lease_Agreement_Creator(id); break;
+  case ligarium::Table::Maintenance: w = new W_Maintenance_Creator(id); break;
+  case ligarium::Table::Property:    w = new W_Property_Creator(id); break;
+  // case ligarium::Table::Property_Feature: w = new W_Property_Feature_Creator(id); break;
+  // case ligarium::Table::Property_Room:    w = new W_Property_Room_Creator(id); break;
+  case ligarium::Table::Receipt:     w = new W_Receipt_Creator(id); break;
+  // case ligarium::Table::Rent:        w = new W_Rent_Creator(id); break;
+  case ligarium::Table::Tenant:      w = new W_Tenant_Creator(id); break;
 
-  default:                  assert(false && "Must be a valid table");
+  default:                           assert(false && "Must be a valid table");
   }
 
   w->setModal(true);
@@ -124,7 +124,7 @@ void W_Rec_Selectable::on_b_edit_clicked()
 void W_Rec_Selectable::on_b_delete_clicked()
 {
 #define case_rec(_rec)                                                                                                 \
-  case ETable::_rec: (void)_rec::read_record(id).delete_record(true); break;
+  case ligarium::Table::_rec: (void)_rec::read_record(id).delete_record(true); break;
 
   switch (table) {
     // case_rec(Attachment);

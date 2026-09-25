@@ -10,7 +10,6 @@
 #include <cstdint>
 #include <ligarium/database.h>
 #include <ligarium/field.h>
-#include <ligarium/polymorphic_link.h>
 #include <ligarium/record.h>
 #include <ligarium/schema.h>
 #include <memory>
@@ -21,32 +20,32 @@ class TestPolymorphicLink : public QObject
   Q_OBJECT
 
 private:
-  QSqlDatabase                        m_sql_database;
-  std::unique_ptr<ligarium::Database> m_database;
+  QSqlDatabase        m_sql_database;
+  ligarium::Database* m_database;
 
 private slots:
   void initTestCase()
   {
     const QString connection_name = "ligarium_polymorphic_link_test";
 
-    QSqlDatabase connection = QSqlDatabase::addDatabase("QSQLITE", connection_name);
+    m_sql_database = QSqlDatabase::addDatabase("QSQLITE", connection_name);
 
-    connection.setDatabaseName(":memory:");
+    m_sql_database.setDatabaseName(":memory:");
 
-    QVERIFY(connection.open());
+    QVERIFY(m_sql_database.open());
 
-    ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder schema(m_sql_database);
 
     if (!schema.create_all<Property, Tenant, Attachment>()) {
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_database = std::make_unique<ligarium::Database>(connection);
+    m_database = new ligarium::Database(m_sql_database);
   }
 
   void cleanupTestCase()
   {
-    m_database.reset();
+    delete m_database;
 
     const QString connection_name = m_sql_database.connectionName();
 
@@ -58,33 +57,33 @@ private slots:
 
   void defaultState()
   {
-    ligarium::PolymorphicLink<Property> link;
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
 
     QVERIFY(link.empty());
     QCOMPARE(link.size(), qsizetype(0));
-    QVERIFY(link.ids.isEmpty());
+    QVERIFY(link.empty());
   }
 
   void ids()
   {
-    ligarium::PolymorphicLink<Property> link;
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
 
-    link.ids = {1, 2, 3};
+    link.set_ids({1, 2, 3});
 
     QVERIFY(!link.empty());
     QCOMPARE(link.size(), qsizetype(3));
-    QCOMPARE(link.ids, QList<qsizetype>({1, 2, 3}));
+    QCOMPARE(link.ids(), QList<qsizetype>({1, 2, 3}));
   }
 
   void clear()
   {
-    ligarium::PolymorphicLink<Property> link;
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
 
-    link.ids = {1, 2};
+    link.set_ids({1, 2});
 
     QVERIFY(!link.empty());
 
-    link.ids.clear();
+    link.ids().clear();
 
     QVERIFY(link.empty());
     QCOMPARE(link.size(), qsizetype(0));
@@ -92,7 +91,7 @@ private slots:
 
   void getEmpty()
   {
-    ligarium::PolymorphicLink<Property> link;
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
 
     const QList<Property> records = link.get(*m_database);
 
@@ -112,8 +111,8 @@ private slots:
 
     const QList<qsizetype> ids = {1, 2, 3};
 
-    ligarium::PolymorphicLink<Property> link;
-    link.ids = ids;
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
+    link.set_ids(ids);
 
     const QList<Property> properties = link.get(*m_database);
 
@@ -138,9 +137,9 @@ private slots:
                         "('Bob')"),
              qPrintable(query.lastError().text()));
 
-    ligarium::PolymorphicLink<Tenant> link;
+    ligarium::Link<Tenant, ligarium::ERelation::PolymorphicOneToMany> link;
 
-    link.ids = {1, 2};
+    link.set_ids({1, 2});
 
     const QList<Tenant> tenants = link.get(*m_database);
 
@@ -163,9 +162,9 @@ private slots:
                         "('Office')"),
              qPrintable(query.lastError().text()));
 
-    ligarium::PolymorphicLink<Property> link;
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
 
-    link.ids = {3, 1, 2};
+    link.set_ids({3, 1, 2});
 
     const QList<Property> properties = link.get(*m_database);
 
@@ -191,8 +190,8 @@ private slots:
 
     const qsizetype property_id = query.lastInsertId().toLongLong();
 
-    ligarium::PolymorphicLink<Property> link;
-    link.ids = {property_id};
+    ligarium::Link<Property, ligarium::ERelation::PolymorphicOneToMany> link;
+    link.set_ids({property_id});
 
     const QList<Property> properties = link.get(*m_database);
 
