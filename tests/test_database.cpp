@@ -1,7 +1,7 @@
 #include "ligarium_config.h"
 
 //
-#include "test_records.h"
+#include "records.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -41,7 +41,7 @@ private slots:
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_database = new ligarium::Database(m_connection);
+    m_database = new ligarium::Database(std::move(m_connection));
   }
 
   void cleanupTestCase()
@@ -72,7 +72,8 @@ private slots:
     QVERIFY(
         query.prepare("INSERT INTO property "
                       "(name, surface) "
-                      "VALUES (:name, :surface)"));
+                      "VALUES (:name, :surface)")
+    );
 
     query.bindValue(":name", "House");
     query.bindValue(":surface", 120.5);
@@ -143,7 +144,8 @@ private slots:
                    "(name, surface) VALUES "
                    "('House A', 100), "
                    "('House B', 200), "
-                   "('House C', 300)"));
+                   "('House C', 300)")
+    );
 
     const auto result = m_database->all(ligarium::Table::Property);
 
@@ -166,7 +168,8 @@ private slots:
         query.exec("INSERT INTO property "
                    "(name) VALUES "
                    "('ID A'), "
-                   "('ID B')"));
+                   "('ID B')")
+    );
 
     const auto result = m_database->all_ids(ligarium::Table::Property);
 
@@ -191,7 +194,8 @@ private slots:
     QVERIFY(
         query.prepare("INSERT INTO property "
                       "(name, surface) "
-                      "VALUES (:name, :surface)"));
+                      "VALUES (:name, :surface)")
+    );
 
     query.bindValue(":name", "Unique Property");
     query.bindValue(":surface", 456.75);

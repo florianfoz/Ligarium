@@ -8,13 +8,25 @@
 #include <QWidget>
 #include <ligarium/widget_registry.h>
 
-class PropertyWidget : public QWidget
+class PropertyWidget : public ligarium::IRecordWidget
 {
   Q_OBJECT
 public:
-  explicit PropertyWidget(QWidget* parent = nullptr, qsizetype id = ligarium::INVALID_ID)
-    : QWidget(parent)
+  explicit PropertyWidget(QWidget* parent, ligarium::Database& db, qsizetype id)
+    : ligarium::IRecordWidget(parent)
+    , m_db(&db)
     , m_id(id)
+  {
+  }
+
+  void load() override
+  {
+  }
+  bool save() override
+  {
+    return true;
+  }
+  void reset() override
   {
   }
 
@@ -25,7 +37,8 @@ public:
   }
 
 private:
-  qsizetype m_id = ligarium::INVALID_ID;
+  qsizetype           m_id = ligarium::INVALID_ID;
+  ligarium::Database* m_db = nullptr;
 };
 
 #endif // TEST_WIDGET_REGISTRY_H

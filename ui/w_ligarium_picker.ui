@@ -43,7 +43,7 @@
     </widget>
    </item>
    <item row="3" column="0" colspan="2">
-    <widget class="W_Tile_View" name="view" native="true"/>
+    <widget class="ligarium::W_Tile_View" name="view" native="true"/>
    </item>
    <item row="0" column="1" rowspan="2">
     <widget class="QLabel" name="label_3">
@@ -97,14 +97,14 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>W_Tile_View</class>
+   <class>ligarium::W_Tile_View</class>
    <extends>QWidget</extends>
-   <header>utils/w_tile_view.h</header>
+   <header>ligarium/widget/w_tile_view.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections>
   <connection>

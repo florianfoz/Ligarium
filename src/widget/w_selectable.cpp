@@ -5,7 +5,10 @@
 
 #include <QDialog>
 
-ligarium::W_Selectable::W_Selectable(ligarium::Database& db, ligarium::Table table, qsizetype id)
+namespace ligarium
+{
+
+W_Selectable::W_Selectable(Database& db, Table table, qsizetype id)
   : QWidget(nullptr)
   , m_table(table)
   , m_id(id)
@@ -14,24 +17,23 @@ ligarium::W_Selectable::W_Selectable(ligarium::Database& db, ligarium::Table tab
 {
   ui->setupUi(this);
 
-  QWidget* w = ligarium::WidgetRegistry::new_widget_record_view(m_db, m_table, m_id);
-
-  connect(this, &ligarium::W_Selectable::signal_selected,
-          [this](ligarium::Database&, ligarium::Table, qsizetype _id) { select(_id == this->m_id); });
-
+  QWidget* w = WidgetRegistry::new_widget_record(m_table, m_id, m_db);
+  setWidgetMode(w, WidgetMode::ReadOnly);
   ui->layout->addWidget(w);
+
+  connect(this, &W_Selectable::signal_selected, [this](Table, qsizetype _id) { select(_id == this->m_id); });
 
   ui->b_delete->hide();
   ui->b_edit->hide();
 }
 
-ligarium::W_Selectable::~W_Selectable()
+W_Selectable::~W_Selectable()
 {
   delete ui;
 }
 
 
-void ligarium::W_Selectable::select(bool selected)
+void W_Selectable::select(bool selected)
 {
   if (selected) {
     ui->f_selection->setStyleSheet("#f_selection { border: 1px solid blue; }");
@@ -41,31 +43,32 @@ void ligarium::W_Selectable::select(bool selected)
 }
 
 
-void ligarium::W_Selectable::mousePressEvent(QMouseEvent* event)
+void W_Selectable::mousePressEvent(QMouseEvent* event)
 {
-  emit signal_selected(m_db, m_table, m_id);
+  emit signal_selected(m_table, m_id);
 }
 
-void ligarium::W_Selectable::on_b_edit_clicked()
+void W_Selectable::on_b_edit_clicked()
 {
-  QDialog* w = ligarium::WidgetRegistry::new_widget_record_creator(m_db, m_table, m_id);
-  w->setModal(true);
-  w->exec();
+  auto* w = WidgetRegistry::new_widget_record(m_table, m_id, m_db);
+  exec_widget_dialog(parentWidget(), w);
 }
 
-void ligarium::W_Selectable::on_b_delete_clicked()
+void W_Selectable::on_b_delete_clicked()
 {
-  (void)ligarium::delete_record(m_db, m_table, m_id);
+  (void)delete_record(m_db, m_table, m_id);
 }
 
-void ligarium::W_Selectable::enterEvent(QEnterEvent* event)
+void W_Selectable::enterEvent(QEnterEvent* event)
 {
   ui->b_delete->show();
   ui->b_edit->show();
 }
 
-void ligarium::W_Selectable::leaveEvent(QEvent* event)
+void W_Selectable::leaveEvent(QEvent* event)
 {
   ui->b_delete->hide();
   ui->b_edit->hide();
 }
+
+} // namespace ligarium

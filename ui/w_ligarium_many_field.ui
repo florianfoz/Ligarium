@@ -41,8 +41,8 @@
          <string>Add Record</string>
         </property>
         <property name="icon">
-         <iconset>
-          <normaloff>:/assets/list-add.svg</normaloff>:/assets/list-add.svg</iconset>
+         <iconset resource="../resources/icons.qrc">
+          <normaloff>:/list-add.svg</normaloff>:/list-add.svg</iconset>
         </property>
        </widget>
       </item>
@@ -57,7 +57,7 @@
            <x>0</x>
            <y>0</y>
            <width>320</width>
-           <height>273</height>
+           <height>272</height>
           </rect>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
@@ -74,8 +74,8 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../resources/icons.qrc"/>
-  <include location="../../resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

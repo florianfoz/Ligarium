@@ -1,2 +1,14 @@
+
 CompileFlags:
   CompilationDatabase: build/debug
+  Remove:
+    - -include-pch
+    - -include
+
+Index:
+  Background: Build
+  StandardLibrary: false
+
+Diagnostics:
+  UnusedIncludes: None
+  MissingIncludes: None

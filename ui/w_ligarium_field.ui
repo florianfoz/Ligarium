@@ -68,7 +68,7 @@
          <string/>
         </property>
         <property name="pixmap">
-         <pixmap>:/assets/sqlitebrowser.svg</pixmap>
+         <pixmap resource="../resources/icons.qrc">:/sqlitebrowser.svg</pixmap>
         </property>
         <property name="scaledContents">
          <bool>true</bool>
@@ -81,7 +81,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../../resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

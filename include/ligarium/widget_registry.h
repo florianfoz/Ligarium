@@ -18,46 +18,35 @@ class WidgetRegistry
 public:
   WidgetRegistry() = delete;
 
-  using FactoryWidgetRecordCreator = std::function<QWidget*(QWidget*, qsizetype)>;
-  using FactoryWidgetRecordView    = std::function<QWidget*(QWidget*, qsizetype)>;
-  using Dumper                     = std::function<QString(ligarium::Database& db, qsizetype id)>;
+  using FactoryWidgetRecord = std::function<IRecordWidget*(QWidget*, ligarium::Database&, qsizetype)>;
+  using Dumper              = std::function<QString(ligarium::Database&, qsizetype)>;
 
   struct RecordMetadata {
-    FactoryWidgetRecordCreator w_creator;
-    FactoryWidgetRecordView    w_view;
-    Dumper                     dump;
+    FactoryWidgetRecord factory;
+    Dumper              dump;
   };
 
-  static void register_widget(Table table, FactoryWidgetRecordCreator creator, FactoryWidgetRecordView view,
-                              Dumper dumper)
+  static void register_widget(Table table, FactoryWidgetRecord factory, Dumper dumper)
   {
     qDebug() << "widget registered";
 
-    m_widgets.insert(table, RecordMetadata{
-                                .w_creator = std::move(creator),
-                                .w_view    = std::move(view),
-                                .dump      = std::move(dumper),
-                            });
+    m_widgets.insert(
+        table,
+        RecordMetadata{
+            .factory = std::move(factory),
+            .dump    = std::move(dumper),
+        }
+    );
   }
 
   [[nodiscard]]
-  static QWidget* new_widget_record_creator(Table table, qsizetype id, QWidget* parent = nullptr)
+  static IRecordWidget* new_widget_record(Table table, qsizetype id, ligarium::Database& db, QWidget* parent = nullptr)
   {
     const auto it = m_widgets.constFind(table);
 
     if (it == m_widgets.cend()) return nullptr;
 
-    return it.value().w_creator(parent, id);
-  }
-
-  [[nodiscard]]
-  static QWidget* new_widget_record_view(Table table, qsizetype id, QWidget* parent = nullptr)
-  {
-    const auto it = m_widgets.constFind(table);
-
-    if (it == m_widgets.cend()) return nullptr;
-
-    return it.value().w_view(parent, id);
+    return it.value().factory(parent, db, id);
   }
 
   [[nodiscard]]
@@ -85,16 +74,44 @@ private:
   inline static QHash<Table, RecordMetadata> m_widgets;
 };
 
-template <ligarium::RecordType Record, typename TWidgetCreator, typename TWidgetView>
-  requires std::constructible_from<TWidgetCreator, QWidget*, qsizetype> && std::derived_from<TWidgetCreator, QWidget>
-           && std::constructible_from<TWidgetView, QWidget*, qsizetype> && std::derived_from<TWidgetView, QWidget>
+template <ligarium::RecordType Record, typename TWidget>
+  requires std::constructible_from<TWidget, IRecordWidget*, ligarium::Database&, qsizetype>
+           && std::derived_from<TWidget, IRecordWidget>
 void register_widget()
 {
-  auto creator = [](QWidget* parent, qsizetype id) -> QWidget* { return new TWidgetCreator(parent, id); };
-  auto view    = [](QWidget* parent, qsizetype id) -> QWidget* { return new TWidgetView(parent, id); };
-  auto dump    = [](ligarium::Database& db, qsizetype id) -> QString { return ligarium::dump_record<Record>(db, id); };
-  ligarium::WidgetRegistry::register_widget(Record::static_table, creator, view, dump);
+  auto factory = [](QWidget* parent, ligarium::Database& db, qsizetype id) -> TWidget* {
+    return new TWidget(parent, db, id);
+  };
+  auto dump = [](ligarium::Database& db, qsizetype id) -> QString { return ligarium::dump_record<Record>(db, id); };
+  ligarium::WidgetRegistry::register_widget(Record::static_table, factory, dump);
 }
+
+class IRecordWidget : public QWidget
+{
+  Q_OBJECT
+
+public:
+  explicit IRecordWidget(QWidget* parent = nullptr)
+    : QWidget(parent)
+  {
+  }
+
+  virtual ~IRecordWidget() = default;
+
+  virtual void load()
+  {
+  }
+
+  virtual bool save()
+  {
+    return true;
+  }
+
+  virtual void reset()
+  {
+  }
+};
+
 
 } // namespace ligarium
 

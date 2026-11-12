@@ -1,7 +1,7 @@
 #include "ligarium_config.h"
 //
 
-#include "test_records.h"
+#include "records.h"
 
 #include <QSqlDatabase>
 #include <QSqlError>
@@ -55,7 +55,7 @@ private slots:
       }
     }
 
-    m_database = new ligarium::Database(m_sql_database);
+    m_database = new ligarium::Database(std::move(m_sql_database));
   }
 
   void recordType()
@@ -130,9 +130,11 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO property (name) "
-                        "VALUES ('House')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) "
+                   "VALUES ('House')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
@@ -160,11 +162,13 @@ private slots:
 
     QVERIFY2(query.exec("DELETE FROM property"), qPrintable(query.lastError().text()));
 
-    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
-                        "('House'), "
-                        "('Apartment'), "
-                        "('Office')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) VALUES "
+                   "('House'), "
+                   "('Apartment'), "
+                   "('Office')"),
+        qPrintable(query.lastError().text())
+    );
 
     const QList<Property> properties = Property::all_records(*m_database);
 
@@ -183,10 +187,12 @@ private slots:
 
     QVERIFY2(query.exec("DELETE FROM property"), qPrintable(query.lastError().text()));
 
-    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
-                        "('House'), "
-                        "('Apartment')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) VALUES "
+                   "('House'), "
+                   "('Apartment')"),
+        qPrintable(query.lastError().text())
+    );
 
     const QList<qsizetype> ids = Property::all_records_id(*m_database);
 
@@ -218,9 +224,11 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO property (name) "
-                        "VALUES ('Before')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) "
+                   "VALUES ('Before')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
@@ -239,9 +247,11 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO property (name) "
-                        "VALUES ('House')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) "
+                   "VALUES ('House')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
@@ -262,9 +272,11 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO tenant (name) "
-                        "VALUES ('John')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO tenant (name) "
+                   "VALUES ('John')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
@@ -295,9 +307,11 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO property (name) "
-                        "VALUES ('House')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) "
+                   "VALUES ('House')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
@@ -314,16 +328,20 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO property (name) VALUES "
-                        "('House'), "
-                        "('Villa')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO property (name) VALUES "
+                   "('House'), "
+                   "('Villa')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype first_id = query.lastInsertId().toLongLong();
 
-    QVERIFY2(query.exec("SELECT id FROM property "
-                        "ORDER BY id DESC LIMIT 1"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("SELECT id FROM property "
+                   "ORDER BY id DESC LIMIT 1"),
+        qPrintable(query.lastError().text())
+    );
 
     QVERIFY(query.next());
 
@@ -347,10 +365,12 @@ private slots:
   {
     QSqlQuery query(m_sql_database);
 
-    QVERIFY2(query.exec("INSERT INTO attachment "
-                        "(target_table, target_id, path) "
-                        "VALUES ('Property', 42, '/tmp/document.pdf')"),
-             qPrintable(query.lastError().text()));
+    QVERIFY2(
+        query.exec("INSERT INTO attachment "
+                   "(target_table, target_id, path) "
+                   "VALUES (1, 42, '/tmp/document.pdf')"),
+        qPrintable(query.lastError().text())
+    );
 
     const qsizetype id = query.lastInsertId().toLongLong();
 
@@ -358,9 +378,9 @@ private slots:
 
     QCOMPARE(attachment.id(), id);
 
-    QCOMPARE(attachment.target_table, ligarium::Table_to_str(ligarium::Table::Property));
+    QCOMPARE(attachment.target.table(), ligarium::Table::Property);
 
-    QCOMPARE(attachment.target_id, qsizetype(42));
+    QCOMPARE(attachment.target.id(), qsizetype(42));
 
     QCOMPARE(attachment.path, "/tmp/document.pdf");
 

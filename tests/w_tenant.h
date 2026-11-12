@@ -1,30 +1,29 @@
 #ifndef W_TENANT_H
 #define W_TENANT_H
 
-#include "ligarium_config.h"
+#include "records.h"
 
-#include <QWidget>
-
+class Tenant;
 
 namespace Ui
 {
 class W_Tenant;
 }
 
-class W_Tenant : public QWidget
+class W_Tenant : public ligarium::IRecordWidget
 {
   Q_OBJECT
 
 public:
-  explicit W_Tenant(QWidget* parent, ligarium::Database& db, qsizetype id);
+  explicit W_Tenant(QWidget* parent, ligarium::Database& db, qsizetype id = ligarium::INVALID_ID);
   ~W_Tenant();
 
-  qsizetype           m_id = ligarium::INVALID_ID;
+  Tenant              m_rec;
   ligarium::Database& m_db;
 
-  bool check_data();
-  void refresh();
-  void select(bool selected);
+  void load() override;
+  bool save() override;
+  void reset() override;
 
 private:
   Ui::W_Tenant* ui;

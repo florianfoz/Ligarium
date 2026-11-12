@@ -10,6 +10,21 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "Build ligarium_demo",
+            "type": "shell",
+            "command": "cmake",
+            "args": [
+                "--build",
+                "${workspaceFolder}/build/debug",
+                "--target",
+                "ligarium_demo",
+                "-j",
+                "4"
+            ],
+            "group": "build",
+            "problemMatcher": []
         }
     ]
 }

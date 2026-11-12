@@ -28,40 +28,21 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/ui
 )
 
-file(GLOB_RECURSE LIGARIUM_SOURCES
-    CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/field.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/ligarium.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/link.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/database.cpp"
-)
-
 file(GLOB_RECURSE LIGARIUM_HEADERS
     CONFIGURE_DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/field.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/schema.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/ligarium.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/database.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/link.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/record.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/widget_registry.h"
-    "${CMAKE_CURRENT_SOURCE_DIR}/include/ligarium/ui/.h"
+    "${CMAKE_CURRENT_SOURCE_DIR}/include/*.h"
 )
 
-
-# command getter
-# find ./ui -type f -name "*.ui" | sort
-set(UI
-
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_field.ui"
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_manager.ui"
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_many_elem.ui"
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_many_field.ui"
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_picker.ui"
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_ligarium_selectable.ui"
-"${CMAKE_CURRENT_SOURCE_DIR}/ui/w_tile_view.ui"
-
+file(GLOB_RECURSE LIGARIUM_SOURCES
+    CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp"
 )
+
+file(GLOB_RECURSE LIGARIUM_UIS
+    CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/ui/*.ui"
+)
+
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/ui
@@ -76,10 +57,17 @@ add_library(ligarium ${LIGARIUM_SOURCES})
 
 add_library(ligarium::ligarium ALIAS ligarium)
 
+set_target_properties(ligarium PROPERTIES
+    AUTOMOC ON
+    AUTOUIC ON
+    AUTOUIC_SEARCH_PATHS
+        "${CMAKE_CURRENT_SOURCE_DIR}/ui"
+)
+
 target_sources(ligarium
     PRIVATE
         ${LIGARIUM_SOURCES}
-        ${UI}
+        ${LIGARIUM_UIS}
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS

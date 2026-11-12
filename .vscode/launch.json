@@ -2,13 +2,40 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Rentalis",
+            "name": "Ligarium",
             "type": "lldb",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
             "cwd": "${command:cmake.launchTargetDirectory}",
             "args": [],
             "preLaunchTask": "CMake: Build"
+        },
+        {
+            "name": "test all",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/tests/test_all",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "CMake: Build"
+        },
+        {
+            "name": "test records",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/tests/test_records",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "CMake: Build"
+        },
+        {
+            "name": "Debug ligarium_demo",
+            "type": "lldb",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/debug/tests/ligarium_demo",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "Build ligarium_demo"
         }
     ]
 }

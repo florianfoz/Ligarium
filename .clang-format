@@ -16,7 +16,7 @@ AllowShortBlocksOnASingleLine: false
 AlwaysBreakTemplateDeclarations: true
 BreakBeforeConceptDeclarations: Always
 
-AlignAfterOpenBracket: Align
+AlignAfterOpenBracket: BlockIndent
 AlignArrayOfStructures: Left
 
 MacroBlockBegin: "^AST_NODE\\("

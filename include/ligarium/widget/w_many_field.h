@@ -24,7 +24,7 @@ public:
   void refresh(ligarium::Database& db, ligarium::Table table);
   void clear();
 
-  void set_selection(ligarium::Database& db, ligarium::Table table, QList<qsizetype> ids)
+  void set_selection(ligarium::Database& db, ligarium::Table table, const QList<qsizetype>& ids)
   {
     m_selection = ids;
     refresh(db, table);

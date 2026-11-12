@@ -1,30 +1,34 @@
 #ifndef W_PROPERTY_H
 #define W_PROPERTY_H
 
-#include "ligarium_config.h"
+#include "records.h"
 
-#include <QWidget>
+#include <QDialog>
+
+enum class EMode : uint8_t;
 
 namespace Ui
 {
-class W_Property;
+class W_property;
 }
 
-class W_Property : public QWidget
+class W_property : public ligarium::IRecordWidget
 {
   Q_OBJECT
 
 public:
-  explicit W_Property(QWidget* parent, ligarium::Database& db, qsizetype id);
-  ~W_Property();
+  explicit W_property(QWidget* parent, ligarium::Database& db, qsizetype id = ligarium::INVALID_ID);
+  ~W_property();
 
-  qsizetype           m_id = ligarium::INVALID_ID;
+  Property            m_rec;
   ligarium::Database& m_db;
 
-  void refresh();
+  void load() override;
+  bool save() override;
+  void reset() override;
 
 private:
-  Ui::W_Property* ui;
+  Ui::W_property* ui;
 };
 
 #endif // W_PROPERTY_H

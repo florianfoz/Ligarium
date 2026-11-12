@@ -7,29 +7,47 @@
 #include <QSqlQuery>
 #include <QVariant>
 #include <optional>
+#include <utility>
 
 namespace ligarium
 {
 
 class WidgetRegistry;
 
+using BindArgs = QList<QPair<QString, QVariant>>;
+
 class Database final : public QObject
 {
   Q_OBJECT
+
 public:
-  explicit Database(QSqlDatabase database);
+  Database() = delete;
+  explicit Database(QSqlDatabase&& database);
+  ~Database();
 
   [[nodiscard]]
   const QSqlDatabase& connection() const noexcept;
+  [[nodiscard]]
+  QSqlDatabase& connection() noexcept;
 
   [[nodiscard]]
   bool is_open() const noexcept;
 
+
+  // create a query object on the database
+  [[nodiscard]]
+  QSqlQuery query(const QString& query, const BindArgs& binds = {}) const;
+
+  // execute the query
   [[nodiscard]]
   bool execute(QSqlQuery& query) const;
 
+  // execute the query then next record (if execute is successful)
   [[nodiscard]]
   bool execute_next(QSqlQuery& query) const;
+
+  [[nodiscard]]
+  bool next(QSqlQuery& query) const;
 
   [[nodiscard]]
   qsizetype last_insert_id() const;

@@ -30,12 +30,12 @@ void ligarium::W_Picker::refresh(ligarium::Database& db, ligarium::Table _rec_ta
 
   for (auto id : ids) {
     auto* w = new W_Selectable(*m_db, m_table, id);
-    connect(w, &W_Selectable::signal_selected, [this](ligarium::Database&, ligarium::Table, qsizetype id) {
+    connect(w, &W_Selectable::signal_selected, [this](ligarium::Table, qsizetype id) {
       for (auto* elem : ui->view->childrens()) {
         auto* ptr = qobject_cast<W_Selectable*>(elem);
         ptr->select(ptr->m_id == id);
       }
-      emit signal_on_selected(*m_db, m_table, id);
+      emit signal_selected(m_table, id);
       accept();
     });
 

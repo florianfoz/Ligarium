@@ -10,6 +10,9 @@ namespace Ui
 class W_Tile_View;
 }
 
+namespace ligarium
+{
+
 class W_Tile_View : public QWidget
 {
   Q_OBJECT
@@ -32,5 +35,7 @@ private:
   Ui::W_Tile_View* ui;
   QWidgetList      _childrens;
 };
+
+} // namespace ligarium
 
 #endif // W_TILE_VIEW_H

@@ -2,7 +2,12 @@
 #define LIGARIUM_H
 
 #include <QSqlDatabase>
+#include <QString>
+#include <QWidget>
 
+#define CRITICAL_QUERY(_query, msg)                                                                                    \
+  qCritical() << "ligarium query failed: " << __PRETTY_FUNCTION__ << ": " << msg << ":" << _query.lastError().text()   \
+              << "\n  Last query: " << _query.lastQuery();
 
 namespace ligarium
 {
@@ -20,7 +25,7 @@ enum class ERelation : uint8_t {
   OneToMany,
   ManyToOne,
   ManyToMany,
-  PolymorphicOneToMany,
+  PolymorphicManyToOne,
 };
 
 template <class T>
@@ -47,6 +52,31 @@ concept RecordFieldDerivedType = requires(T t) {
 
 template <class T>
 concept RecordFieldType = std::derived_from<T, Record<T>> && RecordFieldDerivedType<T>;
+
+enum class WidgetMode : uint8_t { ReadOnly, ReadWrite };
+
+class IRecordWidget;
+
+void setWidgetMode(QWidget* parent, WidgetMode mode);
+bool exec_widget_dialog(QWidget* parent, IRecordWidget* widget, const QString& title = QString());
+
+
+template <typename T>
+concept Is_SQL_Link = requires { typename T::Is_Link; };
+
+template <typename T>
+concept Is_SQL_Direct_Link_Poly = Is_SQL_Link<T> && (T::RELATION == ERelation::PolymorphicManyToOne);
+
+template <typename T>
+concept Is_SQL_Direct_Link = Is_SQL_Link<T>
+                             && (T::RELATION == ERelation::OneToOne || T::RELATION == ERelation::ManyToOne
+                                 || T::RELATION == ERelation::PolymorphicManyToOne);
+
+template <typename T>
+concept Is_SQL_Indirect_Link = Is_SQL_Link<T> && !Is_SQL_Direct_Link<T>;
+
+template <typename T>
+concept Is_SQL_Field = requires { typename T::Is_Field; };
 
 
 } // namespace ligarium

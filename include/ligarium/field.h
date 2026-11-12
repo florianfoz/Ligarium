@@ -17,8 +17,6 @@
 namespace ligarium
 {
 
-void emit_on_record_saved(Database& db, Table table);
-
 /**
  * @brief Converts a C++ value to and from SQL.
  */
@@ -38,8 +36,10 @@ struct SqlConverter {
 /**
  * @brief Metadata for a regular SQL field.
  */
-template <RecordFieldType RECORD, typename MEMBER>
+template <typename RECORD, typename MEMBER>
 struct SqlField {
+  using Is_Field = void;
+
   using record_type = RECORD;
   using value_type  = MEMBER;
 
@@ -60,7 +60,7 @@ struct SqlField {
 /**
  * @brief Creates metadata for a regular SQL field.
  */
-template <RecordFieldType RECORD, typename MEMBER>
+template <typename RECORD, typename MEMBER>
 constexpr auto field(QStringView name, MEMBER RECORD::* member)
 {
   return SqlField<RECORD, MEMBER>{.name = name, .member = member};
@@ -76,13 +76,15 @@ void read_sql_fields(RECORD& record, const QSqlQuery& query)
       [&](const auto&... fields) {
         (
             [&] {
-              if constexpr (requires { fields.read(record, query); }) {
-                fields.read(record, query);
-              }
+              using FIELD = std::decay_t<decltype(fields)>;
+              // if constexpr (Is_Sql_Field<FIELD>)
+              fields.read(record, query);
             }(),
-            ...);
+            ...
+        );
       },
-      RECORD::sql_fields());
+      RECORD::sql_fields()
+  );
 }
 
 /**
@@ -97,15 +99,14 @@ QString make_select_sql()
       [&](const auto&... fields) {
         (
             [&] {
-              if constexpr (requires { fields.read(std::declval<RECORD&>(), std::declval<const QSqlQuery&>()); }) {
-                if constexpr (requires { fields.name; }) {
-                  columns.append(QString(fields.name));
-                }
-              }
+              using FIELD = std::decay_t<decltype(fields)>;
+              if constexpr (Is_SQL_Field<FIELD>) columns.append(QString(fields.name));
             }(),
-            ...);
+            ...
+        );
       },
-      RECORD::sql_fields());
+      RECORD::sql_fields()
+  );
 
   const QString table = Table_to_str(RECORD::static_table);
 
@@ -128,15 +129,15 @@ QString make_update_sql()
       [&](const auto&... fields) {
         (
             [&] {
-              if constexpr (requires { fields.bind(std::declval<QSqlQuery&>(), std::declval<const RECORD&>()); }) {
-                if constexpr (requires { fields.name; }) {
-                  assignments.append(QStringLiteral("%1 = :%1").arg(QString(fields.name)));
-                }
-              }
+              using FIELD = std::decay_t<decltype(fields)>;
+              if constexpr (Is_SQL_Field<FIELD>)
+                assignments.append(QStringLiteral("%1 = :%1").arg(QString(fields.name)));
             }(),
-            ...);
+            ...
+        );
       },
-      RECORD::sql_fields());
+      RECORD::sql_fields()
+  );
 
   if (assignments.isEmpty()) {
     return {};
@@ -163,21 +164,18 @@ bool save_record_fields(QSqlQuery& query, const RECORD& record)
       [&](const auto&... fields) {
         (
             [&] {
-              if constexpr (requires { fields.bind(query, record); }) {
-                fields.bind(query, record);
-              }
+              using FIELD = std::decay_t<decltype(fields)>;
+              if constexpr (Is_SQL_Field<FIELD>) fields.bind(query, record);
             }(),
-            ...);
+            ...
+        );
       },
-      RECORD::sql_fields());
+      RECORD::sql_fields()
+  );
 
   query.bindValue(":id", record.id());
 
-  if (!record.database()->execute(query)) return false;
-
-  emit_on_record_saved(*record.database(), RECORD::static_table);
-
-  return true;
+  return record.database()->execute(query);
 }
 
 } // namespace ligarium

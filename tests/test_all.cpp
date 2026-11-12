@@ -1,7 +1,7 @@
 
 #include "ligarium_config.h"
 //
-#include "test_records.h"
+#include "records.h"
 #include "test_widget_registry.h"
 
 #include <QApplication>
@@ -50,13 +50,16 @@ void TestAll::database_and_records()
 
     QVERIFY(connection.open());
 
-    ligarium::SchemaBuilder schema(connection);
+    ligarium::SchemaBuilder b(connection);
 
-    if (!schema.create_all<Property, Tenant, Attachment>()) {
-      QVERIFY(qPrintable(schema.last_error()));
+    if (!b.create_all<Property, Tenant, Attachment>()) {
+      QVERIFY(qPrintable(b.last_error()));
     }
 
-    ligarium::Database db(connection);
+    qDebug() << b.dump_schema();
+
+    ligarium::Database db(std::move(connection));
+    connection = QSqlDatabase();
 
     QVERIFY(db.is_open());
 
@@ -81,16 +84,11 @@ void TestAll::database_and_records()
     QVERIFY(property.save_record());
 
     loaded = Property::read_record(db, property_id);
-
     QCOMPARE(loaded.name, "Updated House");
-
     QVERIFY(property.delete_record());
     QVERIFY(!property.is_valid());
-
     QVERIFY(!ligarium::contains_record(db, ligarium::Table::Property, property_id));
   }
-
-  QSqlDatabase::removeDatabase(connection_name);
 
   {
     const QString connection_name = "test_all_database_records";
@@ -107,7 +105,7 @@ void TestAll::database_and_records()
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    m_db = new ligarium::Database(connection);
+    m_db = new ligarium::Database(std::move(connection));
 
     QVERIFY(m_db->is_open());
   }
@@ -131,7 +129,7 @@ void TestAll::fields_and_records()
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    ligarium::Database db(connection);
+    ligarium::Database db(std::move(connection));
 
     auto property    = Property::create_record(db);
     property.name    = "Apartment";
@@ -180,21 +178,24 @@ void TestAll::links()
 
 void TestAll::polymorphic_links()
 {
-  ligarium::Link<Attachment, ligarium::ERelation::PolymorphicOneToMany> link;
+  ligarium::Link<Attachment, ligarium::ERelation::PolymorphicManyToOne> link;
 
-  QVERIFY(link.empty());
-  QCOMPARE(link.size(), qsizetype(0));
+  QVERIFY(!link.is_valid());
+  QCOMPARE(link.id(), ligarium::INVALID_ID);
+  QCOMPARE(link.table(), ligarium::Table(0));
 
-  link.set_ids({1, 2, 3});
+  link.set_id(1);
+  link.set_table(ligarium::Table::Tenant);
 
-  QVERIFY(!link.empty());
-  QCOMPARE(link.size(), qsizetype(3));
+  QVERIFY(link.is_valid());
+  QCOMPARE(link.id(), qsizetype(1));
+  QCOMPARE(link.table(), ligarium::Table::Tenant);
 }
 
 
 void TestAll::widget_registry()
 {
-  ligarium::register_widget<Property, PropertyWidget, PropertyWidget>();
+  ligarium::register_widget<Property, PropertyWidget>();
 
   QVERIFY(ligarium::WidgetRegistry::contains(ligarium::Table::Property));
 
@@ -202,7 +203,7 @@ void TestAll::widget_registry()
 
   QWidget parent;
 
-  QWidget* widget = ligarium::WidgetRegistry::new_widget_record_creator(ligarium::Table::Property, 42, &parent);
+  QWidget* widget = ligarium::WidgetRegistry::new_widget_record(ligarium::Table::Property, 42, *m_db, &parent);
 
   QVERIFY(widget != nullptr);
   QCOMPARE(widget->parentWidget(), &parent);
@@ -217,6 +218,7 @@ void TestAll::widget_registry()
 
 void TestAll::complete_workflow()
 {
+
   const QString connection_name = "test_all_workflow";
 
   {
@@ -224,7 +226,9 @@ void TestAll::complete_workflow()
 
     connection.setDatabaseName(":memory:");
 
-    QVERIFY(connection.open());
+    if (!connection.open()) {
+      qFatal("SQLite error: %s", qPrintable(connection.lastError().text()));
+    }
 
     ligarium::SchemaBuilder schema(connection);
 
@@ -232,7 +236,7 @@ void TestAll::complete_workflow()
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    ligarium::Database db(connection);
+    ligarium::Database db(std::move(connection));
 
     auto tenant = Tenant::create_record(db);
     tenant.name = "Alice";
@@ -256,7 +260,8 @@ void TestAll::complete_workflow()
     QWidget parent;
 
     std::unique_ptr<QWidget> widget(
-        ligarium::WidgetRegistry::new_widget_record_creator(ligarium::Table::Property, property.id(), &parent));
+        ligarium::WidgetRegistry::new_widget_record(ligarium::Table::Property, property.id(), *m_db, &parent)
+    );
 
     QVERIFY(widget != nullptr);
 
@@ -281,7 +286,7 @@ int main(int argc, char* argv[])
 {
   QApplication application(argc, argv);
 
-  ligarium::register_widget<Property, PropertyWidget, PropertyWidget>();
+  ligarium::register_widget<Property, PropertyWidget>();
 
   TestAll test;
 

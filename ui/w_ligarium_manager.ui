@@ -28,26 +28,26 @@
       <string>New Record</string>
      </property>
      <property name="icon">
-      <iconset>
-       <normaloff>:/assets/vcs-added.svg</normaloff>:/assets/vcs-added.svg</iconset>
+      <iconset resource="../resources/icons.qrc">
+       <normaloff>:/list-add.svg</normaloff>:/list-add.svg</iconset>
      </property>
     </widget>
    </item>
    <item row="1" column="0">
-    <widget class="W_Tile_View" name="tile_view" native="true"/>
+    <widget class="ligarium::W_Tile_View" name="tile_view" native="true"/>
    </item>
   </layout>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>W_Tile_View</class>
+   <class>ligarium::W_Tile_View</class>
    <extends>QWidget</extends>
-   <header>utils/w_tile_view.h</header>
+   <header>ligarium/widget/w_tile_view.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

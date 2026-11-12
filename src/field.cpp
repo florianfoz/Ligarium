@@ -2,11 +2,6 @@
 
 #include "ligarium/database.h"
 
-void ligarium::emit_on_record_saved(ligarium::Database& db, Table table)
-{
-  emit db.signal_db_updated(table);
-}
-
 template <>
 struct ligarium::SqlConverter<QString> {
   static QString from_sql(const QVariant& value)

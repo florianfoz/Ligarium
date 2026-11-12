@@ -1,5 +1,5 @@
-#ifndef W_REC_SELECTABLE_H
-#define W_REC_SELECTABLE_H
+#ifndef W_SELECTABLE_H
+#define W_SELECTABLE_H
 
 #include "ligarium/ligarium.h"
 
@@ -30,11 +30,8 @@ public:
   void select(bool selected);
 
 
-public slots:
-  void mousePressEvent(QMouseEvent* event) override;
-
 signals:
-  void signal_selected(ligarium::Database& db, ligarium::Table table, qsizetype id);
+  void signal_selected(ligarium::Table table, qsizetype id);
 
 private slots:
   void on_b_edit_clicked();
@@ -42,6 +39,7 @@ private slots:
 
   void enterEvent(QEnterEvent* event) override;
 
+  void mousePressEvent(QMouseEvent* event) override;
   void leaveEvent(QEvent* event) override;
 
 private:
@@ -50,4 +48,4 @@ private:
 
 } // namespace ligarium
 
-#endif // W_REC_SELECTABLE_H
+#endif // W_SELECTABLE_H

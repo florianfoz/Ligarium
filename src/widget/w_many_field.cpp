@@ -48,7 +48,7 @@ void ligarium::W_Many_Field::on_b_add_clicked()
   auto* w = new W_Picker(this, *m_db);
   w->refresh(*m_db, m_table);
 
-  connect(w, &W_Picker::signal_on_selected, [this](ligarium::Database&, ligarium::Table, qsizetype _id) {
+  connect(w, &W_Picker::signal_selected, [this](ligarium::Table, qsizetype _id) {
     m_selection.append(_id);
     refresh(*m_db, m_table);
   });

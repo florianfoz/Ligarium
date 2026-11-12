@@ -1,7 +1,7 @@
 #include "test_widget_registry.h"
 //
 
-#include "test_records.h"
+#include "records.h"
 
 #include <QTest>
 #include <QWidget>
@@ -10,11 +10,22 @@
 class TestWidgetRegistry : public QObject
 {
   Q_OBJECT
+public:
+  TestWidgetRegistry()
+  {
+    auto connexion = QSqlDatabase::addDatabase("QSQLITE", "my_connection_name");
+    connexion.setDatabaseName(":memory:");
+
+    m_db = new ligarium::Database(std::move(connexion));
+  }
+
+  ligarium::Database* m_db = nullptr;
+
 
 private slots:
   void initTestCase()
   {
-    ligarium::register_widget<Property, PropertyWidget, PropertyWidget>();
+    ligarium::register_widget<Property, PropertyWidget>();
   }
 
   void create_registered_widget();
@@ -27,7 +38,7 @@ private slots:
 
 void TestWidgetRegistry::create_registered_widget()
 {
-  QWidget* widget = ligarium::WidgetRegistry::new_widget_record_creator(ligarium::Table::Property, 42);
+  QWidget* widget = ligarium::WidgetRegistry::new_widget_record(ligarium::Table::Property, 42, *m_db);
 
   QVERIFY(widget != nullptr);
 
@@ -42,7 +53,7 @@ void TestWidgetRegistry::create_registered_widget()
 
 void TestWidgetRegistry::create_unknown_widget()
 {
-  QWidget* widget = ligarium::WidgetRegistry::new_widget_record_creator(ligarium::Table::Tenant, 42);
+  QWidget* widget = ligarium::WidgetRegistry::new_widget_record(ligarium::Table::Tenant, 42, *m_db);
 
   QVERIFY(widget == nullptr);
 
@@ -53,7 +64,7 @@ void TestWidgetRegistry::create_with_parent()
 {
   QWidget parent;
 
-  QWidget* widget = ligarium::WidgetRegistry::new_widget_record_creator(ligarium::Table::Property, 42, &parent);
+  QWidget* widget = ligarium::WidgetRegistry::new_widget_record(ligarium::Table::Property, 42, *m_db, &parent);
 
   QVERIFY(widget != nullptr);
   QCOMPARE(widget->parentWidget(), &parent);
@@ -74,11 +85,11 @@ void TestWidgetRegistry::contains_unknown_widget()
 
 void TestWidgetRegistry::register_typed_widget()
 {
-  ligarium::register_widget<Attachment, PropertyWidget, PropertyWidget>();
+  ligarium::register_widget<Attachment, PropertyWidget>();
 
   QVERIFY(ligarium::WidgetRegistry::contains(ligarium::Table::Attachment));
 
-  QWidget* widget = ligarium::WidgetRegistry::new_widget_record_creator(ligarium::Table::Property, 42);
+  QWidget* widget = ligarium::WidgetRegistry::new_widget_record(ligarium::Table::Property, 42, *m_db);
 
   QVERIFY(widget != nullptr);
 

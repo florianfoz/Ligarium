@@ -35,7 +35,7 @@ void ligarium::W_Manager::refresh(ligarium::Database& db, ligarium::Table table)
 
   for (auto id : ids) {
     auto* w = new W_Selectable(*m_db, m_table, id);
-    connect(w, &W_Selectable::signal_selected, [this](ligarium::Database&, ligarium::Table, qsizetype id) {
+    connect(w, &W_Selectable::signal_selected, [this](ligarium::Table, qsizetype id) {
       for (auto* elem : ui->tile_view->childrens()) {
         if (auto* ptr = qobject_cast<W_Selectable*>(elem)) ptr->select(ptr->m_id == id);
       }
@@ -49,16 +49,14 @@ void ligarium::W_Manager::refresh_connection()
 {
   if (connection) disconnect(connection);
 
-  connection =
-      connect(m_db, &ligarium::Database::signal_db_updated, [this](ligarium::Database&, ligarium::Table _table) {
-        if (_table == m_table || _table == ligarium::Table(0)) refresh(*m_db, _table);
-      });
+  connection = connect(m_db, &ligarium::Database::signal_db_updated, [this](ligarium::Table _table) {
+    if (_table == m_table || _table == ligarium::Table(0)) refresh(*m_db, _table);
+  });
 }
 
 
 void ligarium::W_Manager::on_b_new_clicked()
 {
-  QDialog* d = ligarium::WidgetRegistry::new_widget_record_creator(*m_db, m_table, INVALID_ID);
-  d->setModal(true);
-  d->exec();
+  auto* w = ligarium::WidgetRegistry::new_widget_record(m_table, INVALID_ID, *m_db);
+  exec_widget_dialog(parentWidget(), w);
 }

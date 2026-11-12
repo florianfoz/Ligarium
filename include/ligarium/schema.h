@@ -2,9 +2,13 @@
 #define LIGARIUM_SCHEMA_H
 
 
+#include "ligarium/ligarium.h"
+
 #include <QSqlDatabase>
 #include <QSqlError>
+#include <QSqlField>
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QStringList>
 #include <type_traits>
 #include <utility>
@@ -66,8 +70,35 @@ class SchemaBuilder
 {
 public:
   explicit SchemaBuilder(QSqlDatabase database)
-    : m_database(std::move(database))
+    : m_database(database)
   {
+  }
+
+
+  [[nodiscard]]
+  QString dump_schema() const
+  {
+    QString out;
+    out.append("Driver:" + m_database.driverName() + " ");
+    out.append("Database:" + m_database.databaseName() + " ");
+
+    const QStringList tables = m_database.tables(QSql::Tables);
+
+    for (const QString& table : tables) {
+      out.append("Table: " + table + " [");
+      QSqlRecord record = m_database.record(table);
+
+      for (int i = 0; i < record.count(); ++i) {
+        QSqlField field = record.field(i);
+        out.append(field.name() + ", ");
+      }
+      out.chop(2);
+      out.append("], ");
+    }
+    out.chop(2);
+
+
+    return out;
   }
 
   /**
@@ -86,14 +117,33 @@ public:
    * directly in the owner table.
    */
   template <RecordType RECORD>
-  bool create()
+  bool create_fields()
   {
     QStringList columns;
 
     columns.append(QStringLiteral("%1 INTEGER PRIMARY KEY AUTOINCREMENT").arg(quote(u"id")));
 
-    std::apply([&](const auto&... fields) { (add_column_definition<RECORD>(columns, fields), ...); },
-               RECORD::sql_fields());
+    std::apply(
+        [&](const auto&... fields) {
+          (
+              [&] {
+                using FIELD = std::decay_t<decltype(fields)>;
+
+                if constexpr (Is_SQL_Direct_Link_Poly<FIELD>) {
+                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name + "_table")));
+                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name + "_id")));
+                } else if constexpr (Is_SQL_Direct_Link<FIELD>) {
+                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name)));
+                } else if constexpr (!Is_SQL_Link<FIELD>) {
+                  using Value = typename FIELD::value_type;
+                  columns.append(QStringLiteral("%1 %2").arg(quote(fields.name), QString(SqlType<Value>::value)));
+                }
+              }(),
+              ...
+          );
+        },
+        RECORD::sql_fields()
+    );
 
     const QString sql = QStringLiteral("CREATE TABLE IF NOT EXISTS %1 (%2)")
                             .arg(quote(Table_to_str(RECORD::static_table)), columns.join(", "));
@@ -111,11 +161,12 @@ public:
   template <RecordType... RECORDS>
   bool create_all()
   {
-    if (!(create<RECORDS>() && ...)) {
+    if (!(create_fields<RECORDS>() && ...)) {
       return false;
     }
 
-    return (create_relations<RECORDS>() && ...);
+    // return (create_relations<RECORDS>() && ...);
+    return true;
   }
 
 private:
@@ -131,35 +182,16 @@ private:
   [[nodiscard]]
   bool execute(const QString& sql)
   {
-    QSqlQuery query(m_database);
+    QSqlQuery q(m_database);
 
-    if (query.exec(sql)) {
+    if (q.exec(sql)) {
       return true;
     }
 
-    m_last_error = query.lastError().text();
+    m_last_error = q.lastError().text();
     return false;
   }
 
-  template <RecordType RECORD, typename FIELD>
-  void add_column_definition(QStringList& columns, const FIELD& field)
-  {
-    if constexpr (requires { typename FIELD::relation; }) {
-      if constexpr (FIELD::relation == ERelation::OneToOne || FIELD::relation == ERelation::ManyToOne) {
-        columns.append(QStringLiteral("%1 INTEGER").arg(quote(field.name)));
-      }
-
-      return;
-    }
-
-    if constexpr (requires { typename FIELD::value_type; }) {
-      using Value = typename FIELD::value_type;
-
-      if constexpr (requires { SqlType<Value>::value; }) {
-        columns.append(QStringLiteral("%1 %2").arg(quote(field.name), QString(SqlType<Value>::value)));
-      }
-    }
-  }
 
   template <RecordType RECORD>
   bool create_relations()
@@ -170,45 +202,21 @@ private:
         [&](const auto&... fields) {
           (
               [&] {
-                if (!result) {
-                  return;
-                }
+                if (!result) return;
 
-                if constexpr (requires { fields.relation; }) {
-                  result = create_relation(RECORD::static_table, fields);
+                using FIELD = std::decay_t<decltype(fields)>;
+
+                if constexpr (Is_SQL_Indirect_Link<FIELD>) {
+                  if (fields.RELATION == ERelation::OneToMany) return create_one_to_many(fields);
                 }
               }(),
-              ...);
+              ...
+          );
         },
-        RECORD::sql_fields());
+        RECORD::sql_fields()
+    );
 
     return result;
-  }
-
-  template <RecordType RECORD, typename FIELD>
-  bool create_relation(Table owner_table, const FIELD& field)
-  {
-    constexpr ERelation relation = FIELD::relation;
-
-    if constexpr (relation == ERelation::OneToOne || relation == ERelation::ManyToOne) {
-      Q_UNUSED(owner_table);
-      Q_UNUSED(field);
-      return true;
-    }
-
-    if constexpr (relation == ERelation::OneToMany) {
-      return create_one_to_many(field);
-    }
-
-    if constexpr (relation == ERelation::ManyToMany) {
-      return create_many_to_many(field);
-    }
-
-    if constexpr (relation == ERelation::PolymorphicOneToMany) {
-      return create_polymorphic(field);
-    }
-
-    return true;
   }
 
   template <typename FIELD>
@@ -229,50 +237,28 @@ private:
     return execute(sql);
   }
 
-  template <typename FIELD>
-  bool create_many_to_many(const FIELD& field)
-  {
-    const QString association = quote(Table_to_str(field.spec.association_table));
-
-    const QString owner_column = quote(field.spec.association_owner_column);
-
-    const QString target_column = quote(field.spec.association_target_column);
-
-    const QString sql = QStringLiteral(
-                            "CREATE TABLE IF NOT EXISTS %1 "
-                            "(%2 INTEGER NOT NULL, "
-                            "%3 INTEGER NOT NULL, "
-                            "PRIMARY KEY (%2, %3))")
-                            .arg(association, owner_column, target_column);
-
-    return execute(sql);
-  }
 
   template <typename FIELD>
   bool create_polymorphic(const FIELD& field)
   {
-    const Table target_table = field.spec.target_table;
-
-    if (!has_column(target_table, QStringView(u"table"))) {
+    {
       const QString sql = QStringLiteral(
                               "ALTER TABLE %1 "
-                              "ADD COLUMN %2 INTEGER NOT NULL DEFAULT 0")
-                              .arg(quote(Table_to_str(target_table)), quote(u"table"));
+                              "ADD COLUMN %2 INTEGER NOT NULL DEFAULT 0"
+      )
+                              .arg(quote(Table_to_str(FIELD::record_type::static_table)), quote(u"target_table"));
 
-      if (!execute(sql)) {
-        return false;
-      }
+      if (!execute(sql)) return false;
     }
 
-    if (!has_column(target_table, QStringView(u"col_id"))) {
+    {
       const QString sql = QStringLiteral(
                               "ALTER TABLE %1 "
-                              "ADD COLUMN %2 INTEGER NOT NULL DEFAULT -1")
-                              .arg(quote(Table_to_str(target_table)), quote(u"col_id"));
+                              "ADD COLUMN %2 INTEGER NOT NULL DEFAULT -1"
+      )
+                              .arg(quote(Table_to_str(FIELD::record_type::static_table)), quote(u"target_id"));
 
-      if (!execute(sql)) {
-        return false;
-      }
+      if (!execute(sql)) return false;
     }
 
     return true;
@@ -280,28 +266,29 @@ private:
 
   bool has_column(Table table, QStringView column)
   {
-    QSqlQuery query(m_database);
+    QSqlQuery q(m_database);
 
     const QString sql = QStringLiteral(
                             "SELECT 1 "
                             "FROM pragma_table_info(%1) "
                             "WHERE name = :name "
-                            "LIMIT 1")
+                            "LIMIT 1"
+    )
                             .arg(quote(Table_to_str(table)));
 
-    if (!query.prepare(sql)) {
-      m_last_error = query.lastError().text();
+    if (!q.prepare(sql)) {
+      m_last_error = q.lastError().text();
       return false;
     }
 
-    query.bindValue(":name", QString(column));
+    q.bindValue(":name", QString(column));
 
-    if (!query.exec()) {
-      m_last_error = query.lastError().text();
+    if (!q.exec()) {
+      m_last_error = q.lastError().text();
       return false;
     }
 
-    return query.next();
+    return q.next();
   }
 
 private:

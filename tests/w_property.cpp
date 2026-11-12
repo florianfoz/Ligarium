@@ -1,37 +1,55 @@
 #include "w_property.h"
 
-#include "test_records.h"
+#include "ligarium_config.h"
+#include "records.h"
 #include "ui_w_property.h"
-#include "w_property_creator.h"
 
-#include <QMessageBox>
-#include <QRegularExpression>
-#include <QSql>
-#include <QSqlQuery>
+#include <QFileDialog>
+#include <QPushButton>
 
 
-W_Property::W_Property(QWidget* parent, ligarium::Database& db, qsizetype id)
-  : QWidget(parent)
-  , m_id(id)
+W_property::W_property(QWidget* parent, ligarium::Database& db, qsizetype id)
+  : ligarium::IRecordWidget(parent)
+  , m_rec(Property::read_record(db, id))
   , m_db(db)
-  , ui(new Ui::W_Property)
+  , ui(new Ui::W_property)
 {
-  assert(id != ligarium::INVALID_ID && "No instance on invalid id");
   ui->setupUi(this);
 
-  refresh();
+  if (id == -1)
+    setWindowTitle(tr("Property Creation"));
+  else
+    setWindowTitle(tr("Property Edition"));
+
+  load();
 }
 
-void W_Property::refresh()
-{
-  auto property = Property::read_record(m_db, m_id);
-  ui->l_name->setText(property.name);
-  ui->l_surface_size->setText(QStringLiteral("%1 m³").arg(property.surface));
-  ui->tenant->set_record(m_db, ligarium::Table::Tenant, property.tenant.id());
-  ui->tenant->set_readonly(true);
-}
-
-W_Property::~W_Property()
+W_property::~W_property()
 {
   delete ui;
+}
+
+void W_property::load()
+{
+  if (m_rec) {
+    ui->le_name->setText(m_rec.name);
+    ui->dsb_surface_size->setValue(m_rec.surface);
+    return;
+  }
+
+  ui->le_name->clear();
+  ui->dsb_surface_size->clear();
+}
+
+void W_property::reset()
+{
+  m_rec = Property::read_record(m_db, m_rec.id());
+  load();
+}
+
+bool W_property::save()
+{
+  m_rec.name    = ui->le_name->text();
+  m_rec.surface = ui->dsb_surface_size->value();
+  return m_rec.save_record();
 }

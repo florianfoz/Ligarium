@@ -27,8 +27,8 @@ public:
   bool     readonly = false;
 
   void set_readonly(bool _readonly);
-  void refresh(ligarium::Database& db, ligarium::Table _rec_table);
-  void set_record(ligarium::Database& db, ligarium::Table _rec_table, qsizetype _id);
+  void refresh(Database& db, Table _rec_table);
+  void set_record(Database& db, Table _rec_table, qsizetype _id);
   void clear();
 
   void hide_tooltip();
@@ -40,21 +40,21 @@ public:
   }
 
   [[nodiscard]]
-  ligarium::Table table() const
+  Table table() const
   {
     return m_table;
   }
 
   [[nodiscard]]
-  ligarium::Database& database() const
+  Database& database() const
   {
     return *m_db;
   }
 
 private:
-  ligarium::Table     m_table = ligarium::Table(0);
-  qsizetype           m_id    = ligarium::INVALID_ID;
-  ligarium::Database* m_db    = nullptr;
+  Table     m_table = Table(0);
+  qsizetype m_id    = INVALID_ID;
+  Database* m_db    = nullptr;
 
 private slots:
   void enterEvent(QEnterEvent* event) override;

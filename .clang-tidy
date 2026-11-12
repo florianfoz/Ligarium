@@ -4,6 +4,7 @@ Checks: >
   clang-analyzer-*,
   bugprone-*,
   readability-*,
+  -llvm-*,
   -modernize-use-trailing-return-type,
   -bugprone-macro-parentheses,
   -bugprone-easily-swappable-parameters,
@@ -18,9 +19,10 @@ Checks: >
   -bugprone-reserved-identifier,
   -readability-convert-member-functions-to-static,
   -bugprone-unhandled-exception-at-new,
-  -readability-function-cognitive-complexity,
   -readability-avoid-nested-conditional-operator,
 
+CheckOptions:
+  readability-function-cognitive-complexity.Threshold: 100
 
 WarningsAsErrors: >
   clang-analyzer-*

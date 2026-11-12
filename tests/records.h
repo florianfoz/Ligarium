@@ -3,10 +3,12 @@
 
 #include "ligarium_config.h"
 //
+#include <ligarium/association_record.h>
 #include <ligarium/field.h>
 #include <ligarium/record.h>
 #include <ligarium/widget_registry.h>
 
+class Tenant;
 
 class Property final : public ligarium::Record<Property>
 {
@@ -36,6 +38,7 @@ public:
   }
 };
 
+class Attachment;
 
 class Tenant final : public ligarium::Record<Tenant>
 {
@@ -63,28 +66,28 @@ public:
   }
 };
 
-class Tenant_Property : public ligarium::Record<Tenant_Property>
+class Tenant_Property final : public ligarium::AssociationRecord<Tenant_Property>
 {
 public:
   static constexpr auto static_table = ligarium::Table::Tenant_Property;
 
-  ligarium::Link<Property, ligarium::ERelation::ManyToOne> property_id;
-  ligarium::Link<Tenant, ligarium::ERelation::ManyToOne>   tenant_id;
+  ligarium::Link<Property, ligarium::ERelation::ManyToOne> property;
+  ligarium::Link<Tenant, ligarium::ERelation::ManyToOne>   tenant;
   double                                                   share_percent = 0.0F;
 
   [[nodiscard]] QString dump() const override
   {
-    auto tenant   = tenant_id.get(*database());
-    auto property = property_id.get(*database());
+    auto ttenant   = tenant.get(*database());
+    auto tproperty = property.get(*database());
 
-    return QStringLiteral("%1 in %2").arg(tenant.dump(), property.dump());
+    return QStringLiteral("%1 in %2").arg(ttenant.dump(), tproperty.dump());
   }
 
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        ligarium::link_ManyToOne(u"property_id", &Tenant_Property::property_id),
-        ligarium::link_ManyToOne(u"tenant_id", &Tenant_Property::tenant_id),
+        ligarium::link_ManyToOne(u"property_id", &Tenant_Property::property),
+        ligarium::link_ManyToOne(u"tenant_id", &Tenant_Property::tenant),
         ligarium::field(u"share_percent", &Tenant_Property::share_percent),
     };
   }
@@ -96,28 +99,30 @@ class Attachment final : public ligarium::Record<Attachment>
 public:
   static constexpr auto static_table = ligarium::Table::Attachment;
 
-  QString   target_table = ligarium::Table_to_str(ligarium::Table::Property);
-  qsizetype target_id    = ligarium::INVALID_ID;
-  QString   path;
+  ligarium::Link<Attachment, ligarium::ERelation::PolymorphicManyToOne> target;
+
+  QString path;
 
   [[nodiscard]]
   QString dump() const override
   {
-    return QStringLiteral("attachment: %1 in %2, id: %3").arg(path).arg(target_table).arg(target_id);
+    return QStringLiteral("attachment: %1 in %2, id: %3")
+        .arg(path)
+        .arg(ligarium::Table_to_str(target.table()))
+        .arg(target.id());
   }
 
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        ligarium::field(u"target_table", &Attachment::target_table), //
-        ligarium::field(u"target_id", &Attachment::target_id),       //
-        ligarium::field(u"path", &Attachment::path)                  //
+        ligarium::link_PolymorphicManyToOne(u"target", &Attachment::target),
+        ligarium::field(u"path", &Attachment::path) //
     };
   }
 
   friend bool operator==(const Attachment& lhs, const Attachment& rhs)
   {
-    return lhs.id() == rhs.id() && lhs.target_table == rhs.target_table && lhs.target_id == rhs.target_id
+    return lhs.id() == rhs.id() && lhs.target.table() == rhs.target.table() && lhs.target.id() == rhs.target.id()
            && lhs.path == rhs.path;
   }
 };

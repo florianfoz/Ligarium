@@ -57,7 +57,7 @@
      </property>
      <property name="icon">
       <iconset>
-       <normaloff>:/assets/accessories-text-editor.svg</normaloff>:/assets/accessories-text-editor.svg</iconset>
+       <normaloff>../resources/accessories-text-editor.svg</normaloff>../resources/accessories-text-editor.svg</iconset>
      </property>
     </widget>
    </item>
@@ -70,15 +70,15 @@
       <string>Delete</string>
      </property>
      <property name="icon">
-      <iconset>
-       <normaloff>:/assets/user-trash.svg</normaloff>:/assets/user-trash.svg</iconset>
+      <iconset resource="../resources/icons.qrc">
+       <normaloff>:/user-trash.svg</normaloff>:/user-trash.svg</iconset>
      </property>
     </widget>
    </item>
   </layout>
  </widget>
  <resources>
-  <include location="../../resources/icons.qrc"/>
+  <include location="../resources/icons.qrc"/>
  </resources>
  <connections/>
 </ui>

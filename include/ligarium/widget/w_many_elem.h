@@ -21,13 +21,9 @@ public:
   explicit W_Many_Elem(QWidget* parent = nullptr);
   ~W_Many_Elem();
 
-  QList<qsizetype> selection;
-
   void refresh(ligarium::Database& db, ligarium::Table table);
   void set_record(ligarium::Database& db, ligarium::Table table, qsizetype id);
   void clear();
-
-  void hide_tooltip();
 
   [[nodiscard]]
   qsizetype id() const
@@ -48,16 +44,11 @@ public:
   }
 
 private:
-  ligarium::Table     m_table   = ligarium::Table(0);
-  qsizetype           m_id      = ligarium::INVALID_ID;
-  QWidget*            m_tooltip = nullptr;
-  ligarium::Database* m_db      = nullptr;
+  ligarium::Table     m_table = ligarium::Table(0);
+  qsizetype           m_id    = ligarium::INVALID_ID;
+  ligarium::Database* m_db    = nullptr;
 
 private slots:
-  void enterEvent(QEnterEvent* event) override;
-
-  void leaveEvent(QEvent* event) override;
-
   void on_b_delete_clicked();
 
 signals:

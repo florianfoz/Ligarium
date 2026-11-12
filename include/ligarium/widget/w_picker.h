@@ -27,7 +27,7 @@ public:
   void refresh(ligarium::Database& db, ligarium::Table _rec_table);
 
 signals:
-  void signal_on_selected(ligarium::Database& db, ligarium::Table _rec_table, qsizetype id);
+  void signal_selected(ligarium::Table _rec_table, qsizetype id);
 
 private slots:
   void on_b_clear_clicked();

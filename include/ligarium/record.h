@@ -22,62 +22,30 @@ template <ligarium::RecordType RECORD>
 void read_record_fields(RECORD& record, const QSqlQuery& query)
 {
   std::apply(
-      [&](const auto&... fields) {
+      [&](const auto&... field) {
         (
             [&] {
-              if constexpr (requires { fields.read(record, query); }) {
-                fields.read(record, query);
-              }
+              using FIELD = std::remove_cvref_t<decltype(field)>;
+              field.read(record, query);
             }(),
-            ...);
+            ...
+        );
       },
-      RECORD::sql_fields());
+      RECORD::sql_fields()
+  );
 }
 
-
-/**
- * @brief Loads external relationships for a record.
- *
- * OneToMany and ManyToMany relationships are stored outside the current
- * record table and therefore require separate SQL queries.
- */
-template <ligarium::RecordType RECORD>
-void read_record_links(RECORD& record)
-{
-  std::apply(
-      [&](const auto&... fields) {
-        (
-            [&] {
-              // A relationship field is identified by its "member"
-              // and "spec" members.
-              if constexpr (requires {
-                              fields.member;
-                              fields.spec;
-                            }) {
-                using FIELD = std::remove_cvref_t<decltype(fields)>;
-
-                if constexpr (requires { FIELD::relation; }) {
-                  if constexpr (FIELD::relation == ligarium::ERelation::OneToMany
-                                || FIELD::relation == ligarium::ERelation::ManyToMany) {
-                    const QList<qsizetype> ids = read_link_ids(FIELD::relation, fields.spec, record.id);
-
-                    (record.*(fields.member)).ids = ids;
-                  }
-                }
-              }
-            }(),
-            ...);
-      },
-      RECORD::sql_fields());
-}
 } // namespace
 
 namespace ligarium
 {
 [[nodiscard]]
-inline qsizetype create_record(Database& db, Table table)
+inline qsizetype create_record(Database& db, Table table, bool emit_update = true)
 {
-  return db.insert(table);
+  auto id = db.insert(table);
+
+  if (emit_update && id != INVALID_ID) emit db.signal_db_updated(table);
+  return id;
 }
 [[nodiscard]]
 inline bool contains_record(Database& db, Table table, qsizetype id)
@@ -87,11 +55,16 @@ inline bool contains_record(Database& db, Table table, qsizetype id)
   return db.contains(table, id);
 }
 [[nodiscard]]
-inline bool delete_record(Database& db, Table table, qsizetype id, bool wmsg = false, const QString& msg = {})
+inline bool delete_record(
+    Database& db, Table table, qsizetype id, bool wmsg = false, const QString& msg = {}, bool emit_update = true
+)
 {
   if (table == Table(0) || id == INVALID_ID) return false;
 
-  return db.remove(table, id);
+  if (!db.remove(table, id)) return false;
+
+  if (emit_update) emit db.signal_db_updated(table);
+  return true;
 }
 
 
@@ -124,7 +97,7 @@ QString dump_record(Database& db, qsizetype id)
 
 template <RecordType T>
 [[nodiscard]]
-bool save_record(T* rec)
+bool save_record(T* rec, bool emit_update = true)
 {
   if (!rec) return false;
 
@@ -132,7 +105,10 @@ bool save_record(T* rec)
 
   if (!valid_sql) return false;
 
-  return save_record_fields(valid_sql.value(), *rec);
+  if (!save_record_fields(valid_sql.value(), *rec)) return false;
+
+  if (emit_update) emit rec->database()->signal_db_updated(T::static_table);
+  return true;
 }
 
 template <RecordType T>
@@ -150,9 +126,6 @@ T from_sql(Database& db, QSqlQuery& query)
   read_record_fields(out, query);
 
   out.set_id(query.value("id").toLongLong());
-
-  // Read relationships stored in other tables.
-  read_record_links(out);
 
   return out;
 }
@@ -174,9 +147,6 @@ QList<T> all_records(const Database& db)
   while (query.next()) {
     records.append(from_sql<T>(const_cast<Database&>(db), query));
   }
-
-  qDebug() << "out";
-
 
   return records;
 }
@@ -256,13 +226,23 @@ public:
   static DERIVED create_record(Database& db)
   {
     if (!db.is_open()) return invalid();
-    auto id = ligarium::create_record(db, DERIVED::static_table);
-    return ligarium::read_record<DERIVED>(db, id);
+    return ligarium::read_record<DERIVED>(db, ligarium::create_record(db, DERIVED::static_table));
+  }
+
+
+  [[nodiscard]]
+  static DERIVED init_record(Database& db)
+  {
+    if (!db.is_open()) return invalid();
+    auto rec = invalid();
+    rec.m_db = &db;
+    return rec;
   }
 
   [[nodiscard]]
   static DERIVED read_record(Database& db, qsizetype id)
   {
+    if (db.is_open() && id == INVALID_ID) return init_record(db);
     if (id == INVALID_ID || !db.is_open()) return invalid();
     return ligarium::read_record<DERIVED>(db, id);
   }
@@ -291,7 +271,7 @@ public:
   bool save_record()
   {
     if (m_db == nullptr) return false;
-    if (m_id == INVALID_ID) m_id = ligarium::create_record(*m_db, DERIVED::static_table);
+    if (m_id == INVALID_ID) m_id = ligarium::create_record(*m_db, DERIVED::static_table, false);
     return ligarium::save_record<DERIVED>(static_cast<DERIVED*>(this));
   }
 

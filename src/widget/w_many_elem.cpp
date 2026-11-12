@@ -4,69 +4,71 @@
 #include "ligarium/widget_registry.h"
 #include "ui_w_ligarium_many_elem.h"
 
-ligarium::W_Many_Elem::W_Many_Elem(QWidget* parent)
+namespace ligarium
+{
+
+W_Many_Elem::W_Many_Elem(QWidget* parent)
   : QWidget(parent)
   , ui(new Ui::W_Ligarium_Many_Elem)
 {
   ui->setupUi(this);
 }
 
-ligarium::W_Many_Elem::~W_Many_Elem()
+W_Many_Elem::~W_Many_Elem()
 {
   delete ui;
-  hide_tooltip();
 }
 
 
-void ligarium::W_Many_Elem::refresh(ligarium::Database& db, ligarium::Table table)
+void W_Many_Elem::refresh(Database& db, Table table)
 {
+  clear();
   m_db    = &db;
   m_table = table;
+  auto* w = WidgetRegistry::new_widget_record(table, m_id, *m_db);
+  if (w) {
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->l_view->addWidget(w);
+  } else {
+    ui->stackedWidget->setCurrentIndex(0);
+    auto* name = ui->stackedWidget->currentWidget()->findChild<QLabel*>("le_name");
+
+    auto text = WidgetRegistry::dump_record(*m_db, m_table, m_id);
+    name->setText(text);
+  }
 }
 
-void ligarium::W_Many_Elem::set_record(ligarium::Database& db, ligarium::Table table, qsizetype id)
+void W_Many_Elem::set_record(Database& db, Table table, qsizetype id)
 {
+  clear();
+
   m_db    = &db;
   m_table = table;
   m_id    = id;
 
-  auto text = ligarium::WidgetRegistry::dump_record(*m_db, m_table, m_id);
+  auto text = WidgetRegistry::dump_record(*m_db, m_table, m_id);
   ui->le_name->setText(text);
 
-  if (m_id == ligarium::INVALID_ID) clear();
+  if (m_id == INVALID_ID) clear();
 }
 
-void ligarium::W_Many_Elem::enterEvent(QEnterEvent* event)
-{
-  hide_tooltip();
-
-  if (m_table != ligarium::Table::NONE && m_id != ligarium::INVALID_ID)
-    m_tooltip = ligarium::WidgetRegistry::new_widget_record_view(*m_db, m_table, m_id);
-}
-
-void ligarium::W_Many_Elem::hide_tooltip()
-{
-  if (m_tooltip) {
-    m_tooltip->deleteLater();
-    m_tooltip = nullptr;
-  }
-}
-
-void ligarium::W_Many_Elem::clear()
+void W_Many_Elem::clear()
 {
   ui->le_name->setText(QObject::tr("Click to select a record"));
-  m_id = ligarium::INVALID_ID;
-  hide_tooltip();
+  m_id = INVALID_ID;
+
+  while (QLayoutItem* item = ui->l_view->takeAt(0)) {
+    if (QWidget* widget = item->widget()) widget->deleteLater();
+    delete item;
+  }
+
+  ui->stackedWidget->setCurrentIndex(0);
 }
 
 
-void ligarium::W_Many_Elem::leaveEvent(QEvent* event)
-{
-  hide_tooltip();
-}
-
-
-void ligarium::W_Many_Elem::on_b_delete_clicked()
+void W_Many_Elem::on_b_delete_clicked()
 {
   emit signal_deleted(m_id);
 }
+
+} // namespace ligarium
