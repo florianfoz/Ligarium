@@ -195,16 +195,15 @@ int main(int argc, char* argv[])
 {
   QApplication application(argc, argv);
 
-  ligarium::register_widget<Property, W_Property_Creator, W_Property_View>();
+  ligarium::register_widget<Property, W_Property>();
 
   ...
 }
 ```
-You can register your record with a widget "creator" and a widget "view", 
+You can register your record with a widget.
 they will be used by ligarium to interact with ligarium widgets to pick, select, create, edit, view your records.
 
-> Hint: use a modification switch mode in your widget creator, check official ligarium implemented projects:
-> https://github.com/florianfoz/rentalis 
+> Hint: liagrium will switch your record widget fields edit/readonly mode depending of the context 
 
 
 Open a Qt SQL connection and use the record API:
