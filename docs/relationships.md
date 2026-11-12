@@ -47,35 +47,9 @@ properties.size();
 
 and loading the target records.
 
-## Many-to-many
-
-Many-to-many relationships use an association table.
-
-For example:
-
-```cpp
-link_ManyToMany(
-    u"tenants",
-    &Property::tenants,
-    ligarium::Table::PropertyTenant,
-    u"property_id",
-    u"tenant_id"
-);
-```
-
-The association table contains the relationship:
-
-```text
-property_id | tenant_id
-------------+----------
-1           | 10
-1           | 12
-2           | 10
-```
-
 ## Association records
 
-When a many-to-many relationship has additional attributes, the association can be represented as a normal `Record`.
+Designed for a many-to-many relationship, it's possible to specify additional attributes, the association is represented as a normal `Record`.
 
 For example:
 
