@@ -9,7 +9,7 @@ ERelation::OneToOne
 ERelation::OneToMany
 ERelation::ManyToOne
 ERelation::ManyToMany
-ERelation::PolymorphicOneToMany
+ERelation::PolymorphicManyToOne
 ```
 
 ## Many-to-one
