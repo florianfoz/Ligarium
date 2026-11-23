@@ -18,16 +18,16 @@ class W_Picker : public QDialog
   Q_OBJECT
 
 public:
-  explicit W_Picker(QWidget* parent, ligarium::Database& db);
+  explicit W_Picker(QWidget* parent, Database& db);
   ~W_Picker();
 
-  ligarium::Table     m_table = ligarium::Table(0);
-  ligarium::Database* m_db    = nullptr;
+  Table     m_table = Table(0);
+  Database* m_db    = nullptr;
 
-  void refresh(ligarium::Database& db, ligarium::Table _rec_table);
+  void refresh(Database& db, Table _rec_table);
 
 signals:
-  void signal_selected(ligarium::Table _rec_table, qsizetype id);
+  void signal_selected(Table _rec_table, qsizetype id);
 
 private slots:
   void on_b_clear_clicked();

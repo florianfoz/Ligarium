@@ -56,8 +56,8 @@
       <string>Edit</string>
      </property>
      <property name="icon">
-      <iconset>
-       <normaloff>../resources/accessories-text-editor.svg</normaloff>../resources/accessories-text-editor.svg</iconset>
+      <iconset resource="../resources/icons.qrc">
+       <normaloff>:/accessories-text-editor.svg</normaloff>:/accessories-text-editor.svg</iconset>
      </property>
     </widget>
    </item>

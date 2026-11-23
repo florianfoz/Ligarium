@@ -100,7 +100,7 @@ QString make_select_sql()
         (
             [&] {
               using FIELD = std::decay_t<decltype(fields)>;
-              if constexpr (Is_SQL_Field<FIELD>) columns.append(QString(fields.name));
+              if constexpr (Is_SQL_Record_Writable<FIELD>) columns.append(QString(fields.name));
             }(),
             ...
         );
@@ -130,7 +130,7 @@ QString make_update_sql()
         (
             [&] {
               using FIELD = std::decay_t<decltype(fields)>;
-              if constexpr (Is_SQL_Field<FIELD>)
+              if constexpr (Is_SQL_Record_Writable<FIELD>)
                 assignments.append(QStringLiteral("%1 = :%1").arg(QString(fields.name)));
             }(),
             ...
@@ -165,7 +165,7 @@ bool save_record_fields(QSqlQuery& query, const RECORD& record)
         (
             [&] {
               using FIELD = std::decay_t<decltype(fields)>;
-              if constexpr (Is_SQL_Field<FIELD>) fields.bind(query, record);
+              if constexpr (Is_SQL_Record_Writable<FIELD>) fields.bind(query, record);
             }(),
             ...
         );

@@ -10,7 +10,7 @@ cmake --build --preset build-debug-linux
 
 clear
 
-ctest --test-dir build/debug --output-on-failure 2>&1 |
+ctest --test-dir build/debug/tests --output-on-failure 2>&1 |
 sed '/=== Stack trace ===/,/=== End of stack trace ===/d' |
 tee test-result.log
 

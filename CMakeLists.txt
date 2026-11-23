@@ -16,6 +16,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
 
 find_package(Qt6 REQUIRED COMPONENTS Core Sql Widgets)
 
@@ -26,6 +27,9 @@ find_package(Qt6 REQUIRED COMPONENTS Core Sql Widgets)
 
 set(CMAKE_AUTOUIC_SEARCH_PATHS
     ${CMAKE_CURRENT_SOURCE_DIR}/ui
+)
+set(QRC
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/icons.qrc
 )
 
 file(GLOB_RECURSE LIGARIUM_HEADERS
@@ -52,28 +56,29 @@ set(CMAKE_AUTOUIC_SEARCH_PATHS
 # Library
 # ---------------------------------------------------------------------------
 
-
-add_library(ligarium ${LIGARIUM_SOURCES})
+add_library(ligarium
+    ${LIGARIUM_SOURCES}
+)
 
 add_library(ligarium::ligarium ALIAS ligarium)
 
-set_target_properties(ligarium PROPERTIES
-    AUTOMOC ON
-    AUTOUIC ON
-    AUTOUIC_SEARCH_PATHS
-        "${CMAKE_CURRENT_SOURCE_DIR}/ui"
-)
-
 target_sources(ligarium
     PRIVATE
-        ${LIGARIUM_SOURCES}
         ${LIGARIUM_UIS}
+        ${QRC}
     PUBLIC
         FILE_SET HEADERS
         BASE_DIRS
             "${CMAKE_CURRENT_SOURCE_DIR}/include"
         FILES
             ${LIGARIUM_HEADERS}
+)
+
+set_target_properties(ligarium PROPERTIES
+    VERSION ${PROJECT_VERSION}
+    SOVERSION ${PROJECT_VERSION_MAJOR}
+    EXPORT_NAME ligarium
+    POSITION_INDEPENDENT_CODE ON
 )
 
 target_include_directories(ligarium

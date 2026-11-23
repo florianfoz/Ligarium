@@ -21,9 +21,8 @@ public:
   explicit W_Many_Elem(QWidget* parent = nullptr);
   ~W_Many_Elem();
 
-  void refresh(ligarium::Database& db, ligarium::Table table);
-  void set_record(ligarium::Database& db, ligarium::Table table, qsizetype id);
-  void clear();
+  void refresh(Database& db, Table table);
+  void set_record(Database& db, Table table, qsizetype id);
 
   [[nodiscard]]
   qsizetype id() const
@@ -32,21 +31,21 @@ public:
   }
 
   [[nodiscard]]
-  ligarium::Table table() const
+  Table table() const
   {
     return m_table;
   }
 
   [[nodiscard]]
-  ligarium::Database& database() const
+  Database& database() const
   {
     return *m_db;
   }
 
 private:
-  ligarium::Table     m_table = ligarium::Table(0);
-  qsizetype           m_id    = ligarium::INVALID_ID;
-  ligarium::Database* m_db    = nullptr;
+  Table     m_table = Table(0);
+  qsizetype m_id    = INVALID_ID;
+  Database* m_db    = nullptr;
 
 private slots:
   void on_b_delete_clicked();

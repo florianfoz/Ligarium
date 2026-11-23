@@ -18,8 +18,8 @@ class WidgetRegistry
 public:
   WidgetRegistry() = delete;
 
-  using FactoryWidgetRecord = std::function<IRecordWidget*(QWidget*, ligarium::Database&, qsizetype)>;
-  using Dumper              = std::function<QString(ligarium::Database&, qsizetype)>;
+  using FactoryWidgetRecord = std::function<IRecordWidget*(QWidget*, Database&, qsizetype)>;
+  using Dumper              = std::function<QString(Database&, qsizetype)>;
 
   struct RecordMetadata {
     FactoryWidgetRecord factory;
@@ -28,8 +28,6 @@ public:
 
   static void register_widget(Table table, FactoryWidgetRecord factory, Dumper dumper)
   {
-    qDebug() << "widget registered";
-
     m_widgets.insert(
         table,
         RecordMetadata{
@@ -40,7 +38,7 @@ public:
   }
 
   [[nodiscard]]
-  static IRecordWidget* new_widget_record(Table table, qsizetype id, ligarium::Database& db, QWidget* parent = nullptr)
+  static IRecordWidget* new_widget_record(Table table, qsizetype id, Database& db, QWidget* parent = nullptr)
   {
     const auto it = m_widgets.constFind(table);
 
@@ -74,16 +72,14 @@ private:
   inline static QHash<Table, RecordMetadata> m_widgets;
 };
 
-template <ligarium::RecordType Record, typename TWidget>
-  requires std::constructible_from<TWidget, IRecordWidget*, ligarium::Database&, qsizetype>
+template <RecordType Record, typename TWidget>
+  requires std::constructible_from<TWidget, IRecordWidget*, Database&, qsizetype>
            && std::derived_from<TWidget, IRecordWidget>
 void register_widget()
 {
-  auto factory = [](QWidget* parent, ligarium::Database& db, qsizetype id) -> TWidget* {
-    return new TWidget(parent, db, id);
-  };
-  auto dump = [](ligarium::Database& db, qsizetype id) -> QString { return ligarium::dump_record<Record>(db, id); };
-  ligarium::WidgetRegistry::register_widget(Record::static_table, factory, dump);
+  auto factory = [](QWidget* parent, Database& db, qsizetype id) -> TWidget* { return new TWidget(parent, db, id); };
+  auto dump    = [](Database& db, qsizetype id) -> QString { return dump_record<Record>(db, id); };
+  WidgetRegistry::register_widget(Record::static_table, factory, dump);
 }
 
 class IRecordWidget : public QWidget

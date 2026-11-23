@@ -39,8 +39,6 @@ private slots:
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    qDebug() << schema.dump_schema() << "\n";
-
 
     m_database = std::make_unique<ligarium::Database>(std::move(m_connection));
 
@@ -60,16 +58,9 @@ private slots:
 
   void manyToOne_foreignKeys_are_persisted()
   {
-    // Arrange : créer les deux enregistrements référencés.
-    QSqlQuery query(m_connection);
+    const qsizetype property_id = Property::create_record(*m_database).id();
 
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO Property DEFAULT VALUES")), qPrintable(query.lastError().text()));
-
-    const qsizetype property_id = query.lastInsertId().toLongLong();
-
-    QVERIFY2(query.exec(QStringLiteral("INSERT INTO Tenant DEFAULT VALUES")), qPrintable(query.lastError().text()));
-
-    const qsizetype tenant_id = query.lastInsertId().toLongLong();
+    const qsizetype tenant_id = Tenant::create_record(*m_database).id();
 
     // Arrange : construire l'association.
     Tenant_Property association;
@@ -79,25 +70,19 @@ private slots:
     association.tenant.set_id(tenant_id);
     association.share_percent = 35.0;
 
+    auto field = ligarium::link_ManyToOne(u"property_id", &Tenant_Property::property);
+    using F    = std::remove_cvref_t<decltype(field)>;
+
     // Act
-    QVERIFY2(association.save_record(), "Impossible de sauvegarder Tenant_Property");
+    QVERIFY2(association.save_record(), "Impossible to save Tenant_Property");
 
-    // Assert : vérifier les valeurs réellement enregistrées.
-    QVERIFY2(
-        query.exec(QStringLiteral("SELECT property_id, tenant_id, share_percent "
-                                  "FROM Tenant_Property")),
-        qPrintable(query.lastError().text())
-    );
+    auto result = Tenant_Property::read_record(*m_database, association.id());
 
-    QVERIFY(query.next());
+    QCOMPARE(result.property.id(), property_id);
 
-    QCOMPARE(query.value(QStringLiteral("property_id")).toLongLong(), property_id);
+    QCOMPARE(result.tenant.id(), tenant_id);
 
-    QCOMPARE(query.value(QStringLiteral("tenant_id")).toLongLong(), tenant_id);
-
-    QCOMPARE(query.value(QStringLiteral("share_percent")).toDouble(), 35.0);
-
-    QVERIFY(!query.next());
+    QCOMPARE(result.share_percent, 35.0);
   }
 };
 

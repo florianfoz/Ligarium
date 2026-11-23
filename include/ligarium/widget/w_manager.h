@@ -21,11 +21,11 @@ public:
   explicit W_Manager(QWidget* parent);
   ~W_Manager();
 
-  ligarium::Table         m_table = ligarium::Table(0);
-  ligarium::Database*     m_db    = nullptr;
+  Table                   m_table = Table(0);
+  Database*               m_db    = nullptr;
   QMetaObject::Connection connection;
 
-  void refresh(ligarium::Database& db, ligarium::Table table);
+  void refresh(Database& db, Table table);
 
 private:
   void refresh_connection();

@@ -30,19 +30,25 @@ void W_Field::refresh(Database& db, Table _rec_table)
 {
   m_db    = &db;
   m_table = _rec_table;
+
+  // refresh
+  if (m_id != INVALID_ID) {
+    if (m_table != Table(0) && m_id != INVALID_ID) {
+      ui->le_name->setText(WidgetRegistry::dump_record(*m_db, m_table, m_id));
+    }
+  }
+  // clear
+  else {
+    ui->le_name->setText(QObject::tr("Click to select a record"));
+    hide_tooltip();
+  }
 }
 
 void W_Field::set_record(Database& db, Table _rec_table, qsizetype _id)
 {
-  m_db    = &db;
-  m_table = _rec_table;
-  m_id    = _id;
+  m_id = _id;
 
-  if (m_table != Table(0) && m_id != INVALID_ID) {
-    ui->le_name->setText(WidgetRegistry::dump_record(*m_db, m_table, m_id));
-  }
-
-  if (m_id == INVALID_ID) clear();
+  refresh(db, _rec_table);
 }
 
 void W_Field::enterEvent(QEnterEvent* event)
@@ -62,14 +68,6 @@ void W_Field::hide_tooltip()
   }
 }
 
-void W_Field::clear()
-{
-  ui->le_name->setText(QObject::tr("Click to select a record"));
-  m_id = INVALID_ID;
-  hide_tooltip();
-}
-
-
 void W_Field::leaveEvent(QEvent* event)
 {
   hide_tooltip();
@@ -88,7 +86,10 @@ void W_Field::mousePressEvent(QMouseEvent* event)
   connect(w, &W_Picker::signal_selected, [&](Table rec_table, qsizetype id) {
     W_Field::set_record(*m_db, rec_table, id);
   });
-  connect(w, &QDialog::rejected, [this]() { clear(); });
+  connect(w, &QDialog::rejected, [this]() {
+    m_id = INVALID_ID;
+    refresh(*m_db, m_table);
+  });
   w->setModal(true);
   w->exec();
 }

@@ -2,8 +2,11 @@
 
 #include "ligarium/database.h"
 
+namespace ligarium
+{
+
 template <>
-struct ligarium::SqlConverter<QString> {
+struct SqlConverter<QString> {
   static QString from_sql(const QVariant& value)
   {
     return value.toString();
@@ -16,7 +19,7 @@ struct ligarium::SqlConverter<QString> {
 };
 
 template <>
-struct ligarium::SqlConverter<int> {
+struct SqlConverter<int> {
   static int from_sql(const QVariant& value)
   {
     return value.toInt();
@@ -29,7 +32,7 @@ struct ligarium::SqlConverter<int> {
 };
 
 template <>
-struct ligarium::SqlConverter<qsizetype> {
+struct SqlConverter<qsizetype> {
   static qsizetype from_sql(const QVariant& value)
   {
     return value.toInt();
@@ -42,7 +45,7 @@ struct ligarium::SqlConverter<qsizetype> {
 };
 
 template <>
-struct ligarium::SqlConverter<float> {
+struct SqlConverter<float> {
   static float from_sql(const QVariant& value)
   {
     return value.toFloat();
@@ -55,7 +58,7 @@ struct ligarium::SqlConverter<float> {
 };
 
 template <>
-struct ligarium::SqlConverter<double> {
+struct SqlConverter<double> {
   static double from_sql(const QVariant& value)
   {
     return value.toDouble();
@@ -68,7 +71,7 @@ struct ligarium::SqlConverter<double> {
 };
 
 template <>
-struct ligarium::SqlConverter<QDate> {
+struct SqlConverter<QDate> {
   static QDate from_sql(const QVariant& value)
   {
     return value.toDate();
@@ -81,7 +84,7 @@ struct ligarium::SqlConverter<QDate> {
 };
 
 template <>
-struct ligarium::SqlConverter<QDateTime> {
+struct SqlConverter<QDateTime> {
   static QDateTime from_sql(const QVariant& value)
   {
     return value.toDateTime();
@@ -97,7 +100,7 @@ struct ligarium::SqlConverter<QDateTime> {
 // not reliable
 // template <typename T>
 //   requires std::is_enum_v<T>
-// struct ligarium::SqlConverter<T> {
+// struct SqlConverter<T> {
 //   static T from_sql(const QVariant& value)
 //   {
 //     return static_cast<T>(value.toInt());
@@ -108,3 +111,5 @@ struct ligarium::SqlConverter<QDateTime> {
 //     return static_cast<int>(value);
 //   }
 // };
+
+} // namespace ligarium

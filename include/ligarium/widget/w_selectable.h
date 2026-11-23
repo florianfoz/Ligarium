@@ -19,19 +19,19 @@ class W_Selectable : public QWidget
   Q_OBJECT
 
 public:
-  explicit W_Selectable(ligarium::Database& db, ligarium::Table table, qsizetype id);
+  explicit W_Selectable(Database& db, Table table, qsizetype id);
   ~W_Selectable();
 
-  ligarium::Table         m_table = ligarium::Table(0);
+  Table                   m_table = Table(0);
   qsizetype               m_id    = INVALID_ID;
-  ligarium::Database&     m_db;
+  Database&               m_db;
   QMetaObject::Connection connection;
 
   void select(bool selected);
 
 
 signals:
-  void signal_selected(ligarium::Table table, qsizetype id);
+  void signal_selected(Table table, qsizetype id);
 
 private slots:
   void on_b_edit_clicked();

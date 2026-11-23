@@ -1,6 +1,8 @@
 #ifndef LIGARIUM_H
 #define LIGARIUM_H
 
+#include "ligarium/resources.h"
+
 #include <QSqlDatabase>
 #include <QString>
 #include <QWidget>
@@ -60,7 +62,6 @@ class IRecordWidget;
 void setWidgetMode(QWidget* parent, WidgetMode mode);
 bool exec_widget_dialog(QWidget* parent, IRecordWidget* widget, const QString& title = QString());
 
-
 template <typename T>
 concept Is_SQL_Link = requires { typename T::Is_Link; };
 
@@ -77,6 +78,12 @@ concept Is_SQL_Indirect_Link = Is_SQL_Link<T> && !Is_SQL_Direct_Link<T>;
 
 template <typename T>
 concept Is_SQL_Field = requires { typename T::Is_Field; };
+
+template <typename T>
+concept Is_SQL_Record_Writable = Is_SQL_Field<T> || Is_SQL_Direct_Link<T>;
+
+template <typename T>
+concept Is_SQL_Record_Not_Writable = !Is_SQL_Record_Writable<T>;
 
 
 } // namespace ligarium

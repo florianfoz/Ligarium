@@ -13,10 +13,6 @@
   <property name="windowTitle">
    <string>Tenant Creator</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/assets/financial-payees.svg</normaloff>:/assets/financial-payees.svg</iconset>
-  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_4">

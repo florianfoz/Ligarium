@@ -72,6 +72,9 @@ public:
   explicit SchemaBuilder(QSqlDatabase database)
     : m_database(database)
   {
+    // any ligarium projects need a schemabuilder to start code, the resources initialization are loaded on the first
+    // schema
+    init_resources();
   }
 
 
@@ -134,7 +137,7 @@ public:
                   columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name + "_id")));
                 } else if constexpr (Is_SQL_Direct_Link<FIELD>) {
                   columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name)));
-                } else if constexpr (!Is_SQL_Link<FIELD>) {
+                } else if constexpr (Is_SQL_Field<FIELD>) {
                   using Value = typename FIELD::value_type;
                   columns.append(QStringLiteral("%1 %2").arg(quote(fields.name), QString(SqlType<Value>::value)));
                 }

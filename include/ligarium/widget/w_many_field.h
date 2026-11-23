@@ -21,13 +21,13 @@ public:
   explicit W_Many_Field(QWidget* parent);
   ~W_Many_Field();
 
-  void refresh(ligarium::Database& db, ligarium::Table table);
+  void refresh(Database& db, Table target_table, Table association_table);
   void clear();
 
-  void set_selection(ligarium::Database& db, ligarium::Table table, const QList<qsizetype>& ids)
+  void set_selection(Database& db, Table target_table, Table association_table, const QList<qsizetype>& ids)
   {
     m_selection = ids;
-    refresh(db, table);
+    refresh(db, target_table, association_table);
   }
 
   [[nodiscard]]
@@ -37,22 +37,23 @@ public:
   }
 
   [[nodiscard]]
-  ligarium::Table table() const
+  Table table() const
   {
-    return m_table;
+    return m_target_table;
   }
 
   [[nodiscard]]
-  ligarium::Database& database() const
+  Database& database() const
   {
     return *m_db;
   }
 
 
 private:
-  ligarium::Table     m_table = ligarium::Table(0);
-  ligarium::Database* m_db;
-  QList<qsizetype>    m_selection;
+  Table            m_target_table      = Table(0);
+  Table            m_association_table = Table(0);
+  Database*        m_db;
+  QList<qsizetype> m_selection;
 
 private slots:
   void on_b_add_clicked();

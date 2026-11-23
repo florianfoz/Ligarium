@@ -52,7 +52,7 @@ public:
   [[nodiscard]]
   TARGET get(Database& db) const
   {
-    return ligarium::read_record<TARGET>(db, m_id);
+    return read_record<TARGET>(db, m_id);
   }
 
   friend bool operator==(const Link&, const Link&) = default;
@@ -90,7 +90,7 @@ public:
   [[nodiscard]]
   TARGET get(Database& db) const
   {
-    return ligarium::read_record<TARGET>(db, m_id);
+    return read_record<TARGET>(db, m_id);
   }
 
   friend bool operator==(const Link&, const Link&) = default;
@@ -144,7 +144,7 @@ public:
     records.reserve(m_ids.size());
 
     for (const qsizetype id : m_ids) {
-      records.append(ligarium::read_record<TARGET>(db, id));
+      records.append(read_record<TARGET>(db, id));
     }
 
     return records;
@@ -178,12 +178,12 @@ public:
   }
 
   [[nodiscard]]
-  ligarium::Table table() const noexcept
+  Table table() const noexcept
   {
     return m_table;
   }
 
-  void set_table(ligarium::Table table) noexcept
+  void set_table(Table table) noexcept
   {
     m_table = table;
   }
@@ -192,21 +192,21 @@ public:
   [[nodiscard]]
   bool is_valid() const noexcept
   {
-    return m_id != INVALID_ID && m_table != ligarium::Table(0);
+    return m_id != INVALID_ID && m_table != Table(0);
   }
 
   template <typename TARGET>
   [[nodiscard]]
   TARGET get(Database& db) const
   {
-    if (TARGET::static_table == m_table) return ligarium::read_record<TARGET>(db, m_id);
+    if (TARGET::static_table == m_table) return read_record<TARGET>(db, m_id);
     return TARGET::invalid();
   }
 
 
 private:
-  ligarium::Table m_table = ligarium::Table(0);
-  qsizetype       m_id    = INVALID_ID;
+  Table     m_table = Table(0);
+  qsizetype m_id    = INVALID_ID;
 };
 
 /**
@@ -248,7 +248,7 @@ struct SqlLinkField {
   {
     // polymorphic convention : name_table, name_id
     if constexpr (RELATION == ERelation::PolymorphicManyToOne) {
-      (record.*member).set_table(ligarium::Table(query.value(name + "_table").toLongLong()));
+      (record.*member).set_table(Table(query.value(name + "_table").toLongLong()));
       (record.*member).set_id(query.value(name + "_id").toLongLong());
       return;
     }

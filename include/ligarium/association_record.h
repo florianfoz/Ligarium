@@ -92,7 +92,7 @@ public:
     );
 
     if (!query.exec()) {
-      qDebug() << "Exec error:" << query.lastError();
+      qCritical() << "Exec error:" << query.lastError();
       return {};
     }
 
@@ -250,6 +250,8 @@ public:
 
     // Commit transaction.
     if (!database.connection().commit()) return rollback();
+
+    emit database.signal_db_updated(DERIVED::static_table);
 
     return true;
   }

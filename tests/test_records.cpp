@@ -43,18 +43,6 @@ private slots:
       QVERIFY(qPrintable(schema.last_error()));
     }
 
-    QStringList tables = m_sql_database.tables();
-
-    for (const QString& table : tables) {
-      QSqlRecord record = m_sql_database.record(table);
-
-      qDebug() << "\nTable :" << table;
-
-      for (int i = 0; i < record.count(); ++i) {
-        qDebug() << "  " << record.fieldName(i) << record.field(i).metaType().name();
-      }
-    }
-
     m_database = new ligarium::Database(std::move(m_sql_database));
   }
 

@@ -4,8 +4,11 @@
 #include "ligarium/widget/w_selectable.h"
 #include "ui_w_ligarium_picker.h"
 
+namespace ligarium
+{
 
-ligarium::W_Picker::W_Picker(QWidget* parent, ligarium::Database& db)
+
+W_Picker::W_Picker(QWidget* parent, Database& db)
   : QDialog(parent)
   , m_db(&db)
   , ui(new Ui::W_Ligarium_Picker)
@@ -13,24 +16,24 @@ ligarium::W_Picker::W_Picker(QWidget* parent, ligarium::Database& db)
   ui->setupUi(this);
 }
 
-ligarium::W_Picker::~W_Picker()
+W_Picker::~W_Picker()
 {
   delete ui;
 }
 
-void ligarium::W_Picker::refresh(ligarium::Database& db, ligarium::Table _rec_table)
+void W_Picker::refresh(Database& db, Table _rec_table)
 {
   m_db    = &db;
   m_table = _rec_table;
   ui->view->clear();
 
-  setWindowTitle(QObject::tr("Select %1").arg(ligarium::Table_to_str(m_table)));
+  setWindowTitle(QObject::tr("Select %1").arg(Table_to_str(m_table)));
 
-  auto ids = ligarium::all_records_id(*m_db, m_table);
+  auto ids = all_records_id(*m_db, m_table);
 
   for (auto id : ids) {
     auto* w = new W_Selectable(*m_db, m_table, id);
-    connect(w, &W_Selectable::signal_selected, [this](ligarium::Table, qsizetype id) {
+    connect(w, &W_Selectable::signal_selected, [this](Table, qsizetype id) {
       for (auto* elem : ui->view->childrens()) {
         auto* ptr = qobject_cast<W_Selectable*>(elem);
         ptr->select(ptr->m_id == id);
@@ -43,7 +46,9 @@ void ligarium::W_Picker::refresh(ligarium::Database& db, ligarium::Table _rec_ta
   }
 }
 
-void ligarium::W_Picker::on_b_clear_clicked()
+void W_Picker::on_b_clear_clicked()
 {
   reject();
 }
+
+} // namespace ligarium

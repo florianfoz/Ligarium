@@ -482,10 +482,6 @@
   <property name="windowTitle">
    <string>Building Creator</string>
   </property>
-  <property name="windowIcon">
-   <iconset>
-    <normaloff>:/assets/gargoyle-house.svg</normaloff>:/assets/gargoyle-house.svg</iconset>
-  </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_3">

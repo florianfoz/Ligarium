@@ -56,8 +56,6 @@ void TestAll::database_and_records()
       QVERIFY(qPrintable(b.last_error()));
     }
 
-    qDebug() << b.dump_schema();
-
     ligarium::Database db(std::move(connection));
     connection = QSqlDatabase();
 

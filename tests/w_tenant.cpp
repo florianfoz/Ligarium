@@ -40,7 +40,7 @@ void W_Tenant::load()
     properties.reserve(recs.size());
     for (const auto& rec : recs) properties.emplace_back(rec.property.id());
 
-    ui->properties->set_selection(m_db, ligarium::Table::Property, properties);
+    ui->properties->set_selection(m_db, ligarium::Table::Property, ligarium::Table::Tenant_Property, properties);
     return;
   }
 
