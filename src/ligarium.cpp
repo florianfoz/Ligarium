@@ -89,7 +89,7 @@ bool exec_widget_dialog(QWidget* parent, IRecordWidget* widget, const QString& t
 }
 
 bool exec_widget_dialog(
-    QWidget* parent, QWidget* widget, std::function<void(QDialog&)>& accepted_callback, const QString& title
+    QWidget* parent, QWidget* widget, std::function<void(QDialog&)> accepted_callback, const QString& title
 )
 {
   if (!widget) return false;
