@@ -46,6 +46,13 @@ void W_Field::set_record(Database& db, Table _rec_table, qsizetype _id)
   refresh(db, _rec_table);
 }
 
+void W_Field::clear()
+{
+  m_id = INVALID_ID;
+
+  refresh(*m_db, m_table);
+}
+
 void W_Field::enterEvent(QEnterEvent* event)
 {
   hide_tooltip();
