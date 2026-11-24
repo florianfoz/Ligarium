@@ -78,7 +78,7 @@ Application
 | [Fields](docs/fields.md)                         | Mapping C++ members to SQL columns            |
 | [Relationships](docs/relationships.md)           | Typed relationships between records           |
 | [Polymorphic relationships](docs/polymorphic.md) | Relationships targeting multiple record types |
-| [Widgets documentation](widgets.md)              | Widgets to manage records and links           |
+| [Widgets](widgets.md)              | Widgets to manage records and links           |
 | [Database](docs/database.md)                     | `ligarium::Database` and Qt SQL               |
 | [Registries](docs/registries.md)                 | Record and GUI registries                     |
 | [Testing](docs/testing.md)                       | Test architecture and QtTest                  |
