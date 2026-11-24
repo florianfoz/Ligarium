@@ -54,11 +54,12 @@ Application
 * Compile-time record metadata
 * Application-defined table types
 * Strongly typed records
+* Ready-to-use Qt Widgets
 * Typed fields
 * One-to-one relationships
 * One-to-many relationships
 * Many-to-one relationships
-* Many-to-many relationships
+* Many-to-many relationships (Association record)
 * Polymorphic relationships
 * Qt SQL integration
 * SQLite support
@@ -77,10 +78,17 @@ Application
 | [Fields](docs/fields.md)                         | Mapping C++ members to SQL columns            |
 | [Relationships](docs/relationships.md)           | Typed relationships between records           |
 | [Polymorphic relationships](docs/polymorphic.md) | Relationships targeting multiple record types |
+| [Widgets documentation](widgets.md)              | Widgets to manage records and links           |
 | [Database](docs/database.md)                     | `ligarium::Database` and Qt SQL               |
 | [Registries](docs/registries.md)                 | Record and GUI registries                     |
 | [Testing](docs/testing.md)                       | Test architecture and QtTest                  |
 | [CMake](docs/cmake.md)                           | Building and integrating Ligarium             |
+
+### Qt Widgets
+
+Ligarium also provides a set of ready-to-use Qt Widgets to work with user-defined records and their relationships. These widgets make it easier to display, create, edit and delete records, select related records, and manage links between them. They include record managers, record pickers, single- and multiple-record relationship fields, and tile-based views. They can be integrated into your application to build database interfaces with less boilerplate code.
+
+See [Widgets documentation](widgets.md) for details.
 
 ## Build
 
