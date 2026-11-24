@@ -61,6 +61,9 @@ class IRecordWidget;
 
 void setWidgetMode(QWidget* parent, WidgetMode mode);
 bool exec_widget_dialog(QWidget* parent, IRecordWidget* widget, const QString& title = QString());
+bool exec_widget_dialog(
+    QWidget* parent, QWidget* widget, std::function<void(QDialog&)>& accepted_callback, const QString& title = QString()
+);
 
 template <typename T>
 concept Is_SQL_Link = requires { typename T::Is_Link; };

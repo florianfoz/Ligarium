@@ -88,4 +88,28 @@ bool exec_widget_dialog(QWidget* parent, IRecordWidget* widget, const QString& t
   return dialog.exec() == QDialog::Accepted;
 }
 
+bool exec_widget_dialog(
+    QWidget* parent, QWidget* widget, std::function<void(QDialog&)>& accepted_callback, const QString& title
+)
+{
+  if (!widget) return false;
+
+  QDialog dialog(parent);
+  dialog.setWindowTitle(title);
+  dialog.setModal(true);
+
+  auto* layout = new QVBoxLayout(&dialog);
+  layout->addWidget(widget);
+
+  auto* buttons = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &dialog);
+
+  layout->addWidget(buttons);
+
+  QObject::connect(buttons, &QDialogButtonBox::accepted, &dialog, [&]() { accepted_callback(dialog); });
+
+  QObject::connect(buttons, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+  return dialog.exec() == QDialog::Accepted;
+}
+
 } // namespace ligarium
