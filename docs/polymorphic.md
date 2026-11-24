@@ -11,8 +11,8 @@ target_id
 the database stores:
 
 ```text
-target_table
-target_id
+__poly_table
+__poly_id
 ```
 
 ## Example
@@ -32,55 +32,29 @@ Attachment
 A typical record can contain:
 
 ```cpp
-class Attachment
-    : public ligarium::Record<Attachment>
+
+class Attachment final : public ligarium::Record<Attachment>
 {
 public:
-    static constexpr auto static_table =
-        ligarium::Table::Attachment;
+  static constexpr auto static_table = ligarium::Table::Attachment;
 
-    ligarium::Table table;
-    qsizetype col_id;
-    QString path;
+  ligarium::Link<Attachment, ligarium::ERelation::PolymorphicManyToOne> target;
+
+  QString path;
+
+  ...
+
+  static constexpr auto sql_fields()
+  {
+    return std::tuple{
+        ligarium::link_PolymorphicManyToOne(&Attachment::target), //
+        ligarium::field(u"path", &Attachment::path),              //
+    };
+  }
+
+  ...
 };
 ```
-
-The pair:
-
-```text
-(table, col_id)
-```
-
-identifies the target.
-
-## `PolymorphicLink`
-
-Ligarium provides:
-
-```cpp
-PolymorphicLink<TARGET>
-```
-
-for polymorphic target collections.
-
-The link stores target identifiers and can load the corresponding records when given the database context.
-
-## Database indexing
-
-A polymorphic relationship generally benefits from an index covering:
-
-```text
-(table, col_id)
-```
-
-For example:
-
-```sql
-CREATE INDEX attachment_target
-ON attachment(table, col_id);
-```
-
-The exact schema remains the application's responsibility.
 
 ## Use cases
 
