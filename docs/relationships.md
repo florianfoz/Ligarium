@@ -51,25 +51,7 @@ and loading the target records.
 
 Designed for a many-to-many relationship, it's possible to specify additional attributes, the association is represented as a normal `Record`.
 
-For example:
-
-```text
-property_id
-landlord_id
-share_percent
-```
-
-can become:
-
-```cpp
-class Landlord_Property
-    : public ligarium::Record<Landlord_Property>
-{
-    // ...
-};
-```
-
-This is useful when the relationship itself has business data.
+> For more information, see [association record](docs/association_record.md)
 
 ## Link metadata
 
