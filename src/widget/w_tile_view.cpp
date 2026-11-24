@@ -32,6 +32,8 @@ void W_Tile_View::clear()
     if (auto* widget = item->widget()) widget->deleteLater();
     delete item;
   }
+
+  _childrens.clear();
 }
 
 } // namespace ligarium

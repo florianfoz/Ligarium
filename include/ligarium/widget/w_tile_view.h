@@ -21,7 +21,6 @@ public:
   explicit W_Tile_View(QWidget* parent = nullptr);
   ~W_Tile_View();
 
-  void         set_column_size(int size);
   void         add_widget(QWidget* widget);
   void         clear();
   QWidgetList& childrens()

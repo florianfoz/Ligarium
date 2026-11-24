@@ -21,11 +21,6 @@ W_Field::~W_Field()
   delete ui;
 }
 
-void W_Field::set_readonly(bool _readonly)
-{
-}
-
-
 void W_Field::refresh(Database& db, Table _rec_table)
 {
   m_db    = &db;

@@ -26,10 +26,8 @@ public:
   QWidget* tooltip  = nullptr;
   bool     readonly = false;
 
-  void set_readonly(bool _readonly);
   void refresh(Database& db, Table _rec_table);
   void set_record(Database& db, Table _rec_table, qsizetype _id);
-  void clear();
 
   void hide_tooltip();
 

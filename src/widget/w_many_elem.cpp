@@ -26,7 +26,7 @@ void W_Many_Elem::refresh(Database& db, Table table)
   m_table = table;
 
   // update
-  if (m_id) {
+  if (m_id != INVALID_ID) {
     auto* w = WidgetRegistry::new_widget_record(table, m_id, *m_db);
     if (w) {
       ui->stackedWidget->setCurrentIndex(1);
