@@ -63,6 +63,12 @@ struct SqlType<QDateTime> {
   static constexpr QStringView value = u"TEXT";
 };
 
+template <typename T>
+  requires(std::is_enum_v<T>)
+struct SqlType<T> {
+  static constexpr QStringView value = u"INTEGER";
+};
+
 /**
  * @brief Generates SQLite tables from ligarium record metadata.
  */
