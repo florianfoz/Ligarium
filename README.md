@@ -110,7 +110,31 @@ ctest --test-dir build/debug --output-on-failure
 ## Quick Start
 See [INSTALLATION.md](/INSTALLATION.md)
 
-> Please note that the project is currently under development, **and not all tests are passing yet**.
+> Please note that the project is currently under development.
+
+All current tests passed !
+
+log
+```txt
+    Start 1: test_all
+1/8 Test #1: test_all .........................   Passed    0.21 sec
+    Start 2: test_database
+2/8 Test #2: test_database ....................   Passed    0.18 sec
+    Start 3: test_link
+3/8 Test #3: test_link ........................   Passed    0.15 sec
+    Start 4: test_polymorphic_link
+4/8 Test #4: test_polymorphic_link ............   Passed    0.17 sec
+    Start 5: test_records
+5/8 Test #5: test_records .....................   Passed    0.15 sec
+    Start 6: test_widget_registry
+6/8 Test #6: test_widget_registry .............   Passed    0.17 sec
+    Start 7: test_association_record
+7/8 Test #7: test_association_record ..........   Passed    0.02 sec
+    Start 8: ligarium_demo
+8/8 Test #8: ligarium_demo ....................   Passed    2.34 sec
+
+100% tests passed, 0 tests failed out of 8
+``` 
 
 Define your configuraition, by create `ligarium_config.h`:
 
@@ -243,9 +267,9 @@ AI assistance does not replace the project's verification process: changes are e
 
 ## Project status
 
-Ligarium is currently **pre-1.0 and under active development**.
+Ligarium is currently **1.0 and under active development**.
 
-**NOT all tests are passing yet**.
+**ALL current tests passed !**.
 
 The API may evolve, particularly around relationship handling, polymorphic relationships, registries, and database integration.
 

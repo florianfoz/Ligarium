@@ -2,19 +2,17 @@
 
 Ligarium is configured by the application that builds it.
 
-The application provides its own table enumeration and exposes it to Ligarium through `LIGARIUM_TABLE_TYPE`.
-
 ## Application table type
 
 For example:
 
 ```cpp
-DEFINE_ENUM(ligarium::Table, int,
-            Property, 1,
-            Tenant, 2,
-            Attachment, 3)
-
-#define LIGARIUM_TABLE_TYPE ligarium::Table
+enum class Table : uint8_t {
+  NONE = 0,
+  Property,
+  Tenant, 
+  Attachment,
+};
 ```
 
 Ligarium then uses:
@@ -53,22 +51,63 @@ The library therefore does not impose a universal table enumeration.
 A typical application configuration header is:
 
 ```cpp
-#ifndef APPLICATION_LIGARIUM_CONFIG_H
-#define APPLICATION_LIGARIUM_CONFIG_H
+#ifndef LIGARIUM_CONFIG_H
+#define LIGARIUM_CONFIG_H
 
-#include <enumlite/enumlite_backend_qt.h>
+#include <QString>
 
-#define ENUMLITE_DEFAULT_BACKEND enumlite::qt_backend
-#include <enumlite/enumlite.h>
+namespace ligarium
+{
 
-DEFINE_ENUM(ligarium::Table, int,
-            Property, 1,
-            Tenant, 2,
-            Attachment, 3)
+// user defined table
+enum class Table : uint8_t {
+  NONE,
+  Attachment,
+  Damage,
+  Invoice,
+  Landlord,
+  LandlordP,
+  Lease_Agreement,
+  Maintenance,
+  Property,
+  Property_Feature,
+  Property_Room,
+  Receipt,
+  Rent,
+  Tenant,
+};
 
-#define LIGARIUM_TABLE_TYPE ligarium::Table
+// user defined table_to_str
+[[nodiscard]]
+inline QString Table_to_str(Table table)
+{
+  switch (table) {
+  case Table::NONE:             return "NONE";
+  case Table::Attachment:       return "Attachment";
+  case Table::Damage:           return "Damage";
+  case Table::Invoice:          return "Invoice";
+  case Table::Landlord:         return "Landlord";
+  case Table::LandlordP:        return "LandlordP";
+  case Table::Lease_Agreement:  return "Lease_Agreement";
+  case Table::Maintenance:      return "Maintenance";
+  case Table::Property:         return "Property";
+  case Table::Property_Feature: return "Property_Feature";
+  case Table::Property_Room:    return "Property_Room";
+  case Table::Receipt:          return "Receipt";
+  case Table::Rent:             return "Rent";
+  case Table::Tenant:           return "Tenant";
+  }
+}
 
-#endif
+} // namespace ligarium
+
+// must be included before user ligarium_config.h file
+#include <ligarium/ligarium.h>
+
+// Current database used
+extern std::optional<ligarium::Database> DATABASE;
+
+#endif // LIGARIUM_CONFIG_H
 ```
 
 ## Build-time inclusion

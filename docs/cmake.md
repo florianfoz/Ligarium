@@ -91,12 +91,6 @@ target_compile_options(Ligarium
 )
 ```
 
-The configuration header defines:
-
-```cpp
-#define LIGARIUM_TABLE_TYPE ligarium::Table
-```
-
 ## Tests target generation
 
 The test suite can automatically discover test sources:

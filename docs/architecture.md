@@ -27,18 +27,20 @@ The application owns the domain model. Ligarium provides the machinery required 
 ```text
 include/
 ├── ligarium.h
+├── association_record.h
 ├── database.h
 ├── record.h
 ├── field.h
+├── schema.h
 ├── link.h
-├── polymorphic_link.h
-└── record_registry.h
+├── widget_registry.h
+└── ...
 
 src/
 ├── database.cpp
 ├── field.cpp
-├── link.cpp
-└── record.cpp
+├── ligarium.cpp
+└── ...
 ```
 
 ### `ligarium.h`
@@ -69,9 +71,9 @@ Describes typed relationships between records.
 
 Represents relationships whose target may belong to different tables.
 
-### `RecordRegistry`
+### `WidgetRegistry`
 
-Provides optional runtime registration of record-related behavior.
+Provides optional runtime registration of record-related behavior with qt widgets.
 
 ## Compile-time model
 

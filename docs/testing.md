@@ -9,19 +9,12 @@ The tests are designed to behave like an application using the library rather th
 The tests define their own application table type:
 
 ```cpp
-DEFINE_ENUM(ligarium::Table, int,
-            Property, 1,
-            Tenant, 2,
-            Attachment, 3)
+enum class Table : uint8_t {
+  Property,
+  Tenant,
+  Attachment,
+};
 ```
-
-and configure Ligarium with:
-
-```cpp
-#define LIGARIUM_TABLE_TYPE ligarium::Table
-```
-
-This verifies the same build-time configuration mechanism used by real applications.
 
 ## Test records
 

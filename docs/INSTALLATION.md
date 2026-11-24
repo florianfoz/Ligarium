@@ -217,12 +217,11 @@ Ligarium uses an application-defined `Table` type.
 The application must define its table enumeration before including Ligarium:
 
 ```cpp
-DEFINE_ENUM(ApplicationTable, int,
-            Property, 1,
-            Tenant, 2,
-            Attachment, 3)
-
-#define LIGARIUM_TABLE_TYPE ApplicationTable
+enum class ApplicationTable : uint8_t {
+  Property,
+  Tenant,
+  Attachment,
+};
 ```
 
 It must also provide the conversion expected by Ligarium:
@@ -242,7 +241,7 @@ inline QString Table_to_str(ApplicationTable table)
 Then:
 
 ```cpp
-#include <ligarium.h>
+#include <ligarium/ligarium.h>
 ```
 
 This configuration is part of Ligarium's compile-time architecture.
@@ -315,7 +314,9 @@ See [`docs/schema.md`](docs/schema.md) for details.
 A minimal application can verify the installation with:
 
 ```cpp
-#include <ligarium.h>
+#include <ligarium/ligarium.h>
+// your own ligarium configuration implementation ALWAYS before the ligarium header
+#include "ligarium_config.h"
 
 int main()
 {
@@ -365,20 +366,6 @@ qDebug() << QSqlDatabase::drivers();
 
 If `QSQLITE` is missing, install or enable the Qt SQLite SQL driver for the Qt installation being used.
 
-### `LIGARIUM_TABLE_TYPE` is not defined
-
-Ligarium requires an application-defined table type.
-
-Define:
-
-```cpp
-#define LIGARIUM_TABLE_TYPE ApplicationTable
-```
-
-before including Ligarium.
-
-For library builds, ensure the configuration header is force-included before Ligarium sources are compiled.
-
 ### Schema creation fails
 
 Check:
@@ -406,13 +393,15 @@ rather than creating only:
 schema.create<Property>();
 ```
 
+> Tips: use schema.dump() to show on the console the current schema generated
+
 
 ## Development workflow
 
 A typical development cycle is:
 
 ```bash
-git clone https://github.com/<owner>/ligarium.git
+git clone https://github.com/florianfoz/ligarium.git
 cd ligarium
 
 cmake --preset debug-linux
