@@ -7,10 +7,6 @@
 #include <QString>
 #include <QWidget>
 
-#define CRITICAL_QUERY(_query, msg)                                                                                    \
-  qCritical() << "ligarium query failed: " << __PRETTY_FUNCTION__ << ": " << msg << ":" << _query.lastError().text()   \
-              << "\n  Last query: " << _query.lastQuery();
-
 namespace ligarium
 {
 

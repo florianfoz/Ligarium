@@ -139,8 +139,8 @@ public:
                 using FIELD = std::decay_t<decltype(fields)>;
 
                 if constexpr (Is_SQL_Direct_Link_Poly<FIELD>) {
-                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name + "_table")));
-                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name + "_id")));
+                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(u"__poly_table")));
+                  columns.append(QStringLiteral("%1 INTEGER").arg(quote(u"__poly_id")));
                 } else if constexpr (Is_SQL_Direct_Link<FIELD>) {
                   columns.append(QStringLiteral("%1 INTEGER").arg(quote(fields.name)));
                 } else if constexpr (Is_SQL_Field<FIELD>) {
@@ -170,12 +170,7 @@ public:
   template <RecordType... RECORDS>
   bool create_all()
   {
-    if (!(create_fields<RECORDS>() && ...)) {
-      return false;
-    }
-
-    // return (create_relations<RECORDS>() && ...);
-    return true;
+    return static_cast<bool>((create_fields<RECORDS>() && ...));
   }
 
 private:
@@ -255,7 +250,7 @@ private:
                               "ALTER TABLE %1 "
                               "ADD COLUMN %2 INTEGER NOT NULL DEFAULT 0"
       )
-                              .arg(quote(Table_to_str(FIELD::record_type::static_table)), quote(u"target_table"));
+                              .arg(quote(Table_to_str(FIELD::record_type::static_table)), quote(u"__poly_table"));
 
       if (!execute(sql)) return false;
     }
@@ -265,7 +260,7 @@ private:
                               "ALTER TABLE %1 "
                               "ADD COLUMN %2 INTEGER NOT NULL DEFAULT -1"
       )
-                              .arg(quote(Table_to_str(FIELD::record_type::static_table)), quote(u"target_id"));
+                              .arg(quote(Table_to_str(FIELD::record_type::static_table)), quote(u"__poly_id"));
 
       if (!execute(sql)) return false;
     }
@@ -311,7 +306,7 @@ private:
 template <RecordType... RECORDS>
 bool create_schema(QSqlDatabase database)
 {
-  SchemaBuilder schema(std::move(database));
+  SchemaBuilder schema(database);
   return schema.create_all<RECORDS...>();
 }
 

@@ -355,7 +355,7 @@ private slots:
 
     QVERIFY2(
         query.exec("INSERT INTO attachment "
-                   "(target_table, target_id, path) "
+                   "(__poly_table, __poly_id, path) "
                    "VALUES (1, 42, '/tmp/document.pdf')"),
         qPrintable(query.lastError().text())
     );

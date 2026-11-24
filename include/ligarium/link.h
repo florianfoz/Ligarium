@@ -143,7 +143,7 @@ public:
     QList<TARGET> records;
     records.reserve(m_ids.size());
 
-    for (const qsizetype id : m_ids) {
+    for (auto id : m_ids) {
       records.append(read_record<TARGET>(db, id));
     }
 
@@ -164,7 +164,7 @@ template <typename SOURCE>
 class Link<SOURCE, ERelation::PolymorphicManyToOne>
 {
 public:
-  static constexpr bool is_sql_column = true;
+  static constexpr bool is_sql_column = false;
 
   [[nodiscard]]
   qsizetype id() const noexcept
@@ -188,6 +188,13 @@ public:
     m_table = table;
   }
 
+  template <typename REC>
+  void link_to(REC& rec) noexcept
+  {
+    m_id    = rec.id();
+    m_table = REC::static_table;
+  }
+
 
   [[nodiscard]]
   bool is_valid() const noexcept
@@ -202,7 +209,6 @@ public:
     if (TARGET::static_table == m_table) return read_record<TARGET>(db, m_id);
     return TARGET::invalid();
   }
-
 
 private:
   Table     m_table = Table(0);
@@ -248,8 +254,8 @@ struct SqlLinkField {
   {
     // polymorphic convention : name_table, name_id
     if constexpr (RELATION == ERelation::PolymorphicManyToOne) {
-      (record.*member).set_table(Table(query.value(name + "_table").toLongLong()));
-      (record.*member).set_id(query.value(name + "_id").toLongLong());
+      (record.*member).set_table(Table(query.value("__poly_table").toLongLong()));
+      (record.*member).set_id(query.value("__poly_id").toLongLong());
       return;
     }
     // record field
@@ -266,8 +272,8 @@ struct SqlLinkField {
 
     // polymorphic convention : name_table, name_id
     if constexpr (RELATION == ERelation::PolymorphicManyToOne) {
-      query.bindValue(":" + name + "_table", qsizetype((record.*member).table()));
-      query.bindValue(":" + name + "_id", (record.*member).id());
+      query.bindValue(":__poly_table", static_cast<qsizetype>((record.*member).table()));
+      query.bindValue(":__poly_id", (record.*member).id());
       return;
     }
     // record field
@@ -326,11 +332,10 @@ constexpr auto link_OneToMany(
 }
 
 template <RecordFieldType RECORD, RecordFieldType TARGET>
-constexpr auto
-link_PolymorphicManyToOne(QStringView name, Link<TARGET, ERelation::PolymorphicManyToOne> RECORD::* member)
+constexpr auto link_PolymorphicManyToOne(Link<TARGET, ERelation::PolymorphicManyToOne> RECORD::* member)
 {
   return SqlLinkField<RECORD, TARGET, ERelation::PolymorphicManyToOne>{
-      .name   = name,
+      .name   = u"__poly",
       .member = member,
       .spec =
           SqlLinkSpec{
@@ -338,17 +343,6 @@ link_PolymorphicManyToOne(QStringView name, Link<TARGET, ERelation::PolymorphicM
                       },
   };
 }
-
-QList<qsizetype> read_link_ids(const Database& db, ERelation relation, const SqlLinkSpec& spec, qsizetype owner_id);
-
-bool save_link_ids(
-    const Database& db, ERelation relation, const SqlLinkSpec& spec, qsizetype owner_id,
-    const QList<qsizetype>& target_ids
-);
-
-bool save_polymorphic_link(
-    const Database& db, const SqlLinkSpec& spec, qsizetype owner_id, const QVector<qsizetype>& target_ids
-);
 
 } // namespace ligarium
 

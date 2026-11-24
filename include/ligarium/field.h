@@ -27,7 +27,7 @@ struct SqlConverter {
     return value.value<VAL>();
   }
 
-  static QVariant to_sql(const VAL& value)
+  static auto to_sql(const VAL& value)
   {
     return QVariant::fromValue(value);
   }
@@ -42,6 +42,8 @@ struct SqlField {
 
   using record_type = RECORD;
   using value_type  = MEMBER;
+  using M           = std::remove_cvref_t<MEMBER>;
+
 
   QStringView name;
   MEMBER RECORD::* member;
@@ -72,19 +74,7 @@ constexpr auto field(QStringView name, MEMBER RECORD::* member)
 template <RecordType RECORD>
 void read_sql_fields(RECORD& record, const QSqlQuery& query)
 {
-  std::apply(
-      [&](const auto&... fields) {
-        (
-            [&] {
-              using FIELD = std::decay_t<decltype(fields)>;
-              // if constexpr (Is_Sql_Field<FIELD>)
-              fields.read(record, query);
-            }(),
-            ...
-        );
-      },
-      RECORD::sql_fields()
-  );
+  std::apply([&](const auto&... fields) { ([&] { fields.read(record, query); }(), ...); }, RECORD::sql_fields());
 }
 
 /**
@@ -100,7 +90,13 @@ QString make_select_sql()
         (
             [&] {
               using FIELD = std::decay_t<decltype(fields)>;
-              if constexpr (Is_SQL_Record_Writable<FIELD>) columns.append(QString(fields.name));
+
+              if constexpr (Is_SQL_Direct_Link_Poly<FIELD>) {
+                columns.append("__poly_table");
+                columns.append("__poly_id");
+              } else if constexpr (Is_SQL_Record_Writable<FIELD>) {
+                columns.append(fields.name);
+              }
             }(),
             ...
         );
@@ -110,9 +106,7 @@ QString make_select_sql()
 
   const QString table = Table_to_str(RECORD::static_table);
 
-  if (columns.isEmpty()) {
-    return QStringLiteral("SELECT id FROM %1 WHERE id = :id").arg(table);
-  }
+  if (columns.isEmpty()) return QStringLiteral("SELECT id FROM %1 WHERE id = :id").arg(table);
 
   return QStringLiteral("SELECT id, %1 FROM %2 WHERE id = :id").arg(columns.join(", "), table);
 }
@@ -130,8 +124,12 @@ QString make_update_sql()
         (
             [&] {
               using FIELD = std::decay_t<decltype(fields)>;
-              if constexpr (Is_SQL_Record_Writable<FIELD>)
+              if constexpr (Is_SQL_Direct_Link_Poly<FIELD>) {
+                assignments.append("__poly_table = :__poly_table");
+                assignments.append("__poly_id = :__poly_id");
+              } else if constexpr (Is_SQL_Record_Writable<FIELD>) {
                 assignments.append(QStringLiteral("%1 = :%1").arg(QString(fields.name)));
+              }
             }(),
             ...
         );
@@ -139,9 +137,7 @@ QString make_update_sql()
       RECORD::sql_fields()
   );
 
-  if (assignments.isEmpty()) {
-    return {};
-  }
+  if (assignments.isEmpty()) return {};
 
   return QStringLiteral("UPDATE %1 SET %2 WHERE id = :id")
       .arg(Table_to_str(RECORD::static_table), assignments.join(", "));
@@ -165,6 +161,7 @@ bool save_record_fields(QSqlQuery& query, const RECORD& record)
         (
             [&] {
               using FIELD = std::decay_t<decltype(fields)>;
+
               if constexpr (Is_SQL_Record_Writable<FIELD>) fields.bind(query, record);
             }(),
             ...

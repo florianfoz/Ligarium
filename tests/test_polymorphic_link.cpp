@@ -40,6 +40,8 @@ private slots:
       QVERIFY(qPrintable(schema.last_error()));
     }
 
+    qDebug() << schema.dump_schema();
+
     m_database = new ligarium::Database(std::move(m_sql_database));
   }
 
@@ -156,6 +158,35 @@ private slots:
     QCOMPARE(tenant1.name, "Alice");
     QCOMPARE(tenant2.id(), qsizetype(2));
     QCOMPARE(tenant2.name, "Bob");
+  }
+
+  void getAttachments()
+  {
+    QSqlQuery query(m_sql_database);
+
+    auto bob = Tenant::create_record(*m_database);
+    bob.name = "bob";
+    bob.save_record();
+
+    auto attach1 = Attachment::create_record(*m_database);
+    attach1.path = ".../identity";
+    attach1.target.link_to(bob);
+    attach1.save_record();
+
+    auto attach2 = Attachment::create_record(*m_database);
+    attach2.path = ".../invoice";
+    attach2.target.link_to(bob);
+    attach2.save_record();
+
+    auto attachments = ligarium::get_related_records<Attachment, Tenant>(*m_database, bob.id());
+
+    QCOMPARE(attachments.size(), 2);
+    QCOMPARE(attachments[0].path, ".../identity");
+    QCOMPARE(attachments[0].target.id(), bob.id());
+    QCOMPARE(attachments[0].target.table(), ligarium::Table::Tenant);
+    QCOMPARE(attachments[1].path, ".../invoice");
+    QCOMPARE(attachments[1].target.id(), bob.id());
+    QCOMPARE(attachments[1].target.table(), ligarium::Table::Tenant);
   }
 };
 

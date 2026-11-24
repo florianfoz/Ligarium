@@ -115,8 +115,8 @@ public:
   static constexpr auto sql_fields()
   {
     return std::tuple{
-        ligarium::link_PolymorphicManyToOne(u"target", &Attachment::target),
-        ligarium::field(u"path", &Attachment::path) //
+        ligarium::link_PolymorphicManyToOne(&Attachment::target), //
+        ligarium::field(u"path", &Attachment::path),              //
     };
   }
 

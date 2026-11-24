@@ -12,7 +12,7 @@ struct SqlConverter<QString> {
     return value.toString();
   }
 
-  static QVariant to_sql(const QString& value)
+  static auto to_sql(const QString& value)
   {
     return value;
   }
@@ -25,7 +25,7 @@ struct SqlConverter<int> {
     return value.toInt();
   }
 
-  static QVariant to_sql(int value)
+  static auto to_sql(int value)
   {
     return value;
   }
@@ -38,7 +38,7 @@ struct SqlConverter<qsizetype> {
     return value.toInt();
   }
 
-  static QVariant to_sql(qsizetype value)
+  static auto to_sql(qsizetype value)
   {
     return value;
   }
@@ -51,7 +51,7 @@ struct SqlConverter<float> {
     return value.toFloat();
   }
 
-  static QVariant to_sql(float value)
+  static auto to_sql(float value)
   {
     return value;
   }
@@ -64,7 +64,7 @@ struct SqlConverter<double> {
     return value.toDouble();
   }
 
-  static QVariant to_sql(double value)
+  static auto to_sql(double value)
   {
     return value;
   }
@@ -77,7 +77,7 @@ struct SqlConverter<QDate> {
     return value.toDate();
   }
 
-  static QVariant to_sql(const QDate& value)
+  static auto to_sql(const QDate& value)
   {
     return value;
   }
@@ -90,26 +90,25 @@ struct SqlConverter<QDateTime> {
     return value.toDateTime();
   }
 
-  static QVariant to_sql(const QDateTime& value)
+  static auto to_sql(const QDateTime& value)
   {
     return value;
   }
 };
 
 
-// not reliable
-// template <typename T>
-//   requires std::is_enum_v<T>
-// struct SqlConverter<T> {
-//   static T from_sql(const QVariant& value)
-//   {
-//     return static_cast<T>(value.toInt());
-//   }
-//
-//   static QVariant to_sql(T value)
-//   {
-//     return static_cast<int>(value);
-//   }
-// };
+template <typename T>
+  requires std::is_enum_v<T>
+struct SqlConverter<T> {
+  static T from_sql(const QVariant& value)
+  {
+    return static_cast<T>(value.toInt());
+  }
+
+  static auto to_sql(T value)
+  {
+    return static_cast<int>(value);
+  }
+};
 
 } // namespace ligarium

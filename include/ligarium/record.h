@@ -25,18 +25,7 @@ namespace
 template <RecordType RECORD>
 void read_record_fields(RECORD& record, const QSqlQuery& query)
 {
-  std::apply(
-      [&](const auto&... field) {
-        (
-            [&] {
-              using FIELD = std::remove_cvref_t<decltype(field)>;
-              field.read(record, query);
-            }(),
-            ...
-        );
-      },
-      RECORD::sql_fields()
-  );
+  std::apply([&](const auto&... field) { ([&] { field.read(record, query); }(), ...); }, RECORD::sql_fields());
 }
 
 } // namespace
@@ -185,6 +174,34 @@ bool is_dirty(const Database& db, const T& _this, qsizetype other_id = INVALID_I
   return _this != read_record<T>(const_cast<Database&>(db), _this.id());
 }
 
+
+// Get all records from a polymorphic link and a record instance
+// SOURCE is the polymorphic link/record
+// TARGET is the related record
+template <typename SOURCE, typename TARGET>
+[[nodiscard]]
+inline QList<SOURCE> get_related_records(const Database& db, qsizetype id)
+{
+  auto valid_sql = db.all(SOURCE::static_table);
+
+  if (!valid_sql) return {};
+
+  QSqlQuery& query = valid_sql.value();
+
+  if (!query.isActive()) return {};
+
+  QList<SOURCE> recs;
+
+  while (query.next()) {
+    const auto q_tbl    = query.value("__poly_table").toLongLong();
+    const auto q_tbl_id = query.value("__poly_id").toLongLong();
+    if (q_tbl == static_cast<qsizetype>(TARGET::static_table) && q_tbl_id == id)
+      recs.emplace_back(read_record<SOURCE>(const_cast<Database&>(db), query.value("id").toLongLong()));
+  }
+
+  return recs;
+}
+
 template <class DERIVED>
 class Record
 {
@@ -262,7 +279,6 @@ public:
     return ::ligarium::all_records_id(db, DERIVED::static_table);
   }
 
-  [[nodiscard]]
   bool delete_record(bool wmsg = false, const QString& msg = {})
   {
     if (m_db == nullptr) return false;
@@ -270,7 +286,6 @@ public:
     return m_id == INVALID_ID;
   }
 
-  [[nodiscard]]
   bool save_record()
   {
     if (m_db == nullptr) return false;
